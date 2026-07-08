@@ -1,0 +1,12 @@
+{
+  "name": "gungpao-app",
+  "version": "1.0.0",
+  "description": "แอปจัดการออร์เดอร์ร้านกุ้งเผา",
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}
