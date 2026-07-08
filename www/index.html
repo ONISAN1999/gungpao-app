@@ -104,6 +104,41 @@
     padding:10px;font-size:13px;font-weight:700;backdrop-filter:blur(12px)}
   .toolbar button:active{transform:scale(.97)}
   .toolbar button.navbtn{background:linear-gradient(135deg,#22c1c3,#3a86ff);border-color:transparent;color:#fff}
+  .section-h{font-size:13px;font-weight:800;opacity:.9;margin:6px 4px 10px;letter-spacing:.3px}
+  /* cart in order modal */
+  .cart{background:rgba(255,255,255,.06);border:1px solid var(--stroke);border-radius:14px;padding:8px;margin-top:6px}
+  .cart .line{display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .cart .line:last-child{border-bottom:none}
+  .cart .line .nm{flex:1;font-size:13.5px;line-height:1.25}
+  .cart .line .pr{font-size:12.5px;opacity:.8;min-width:52px;text-align:right}
+  .cart .qty{display:flex;align-items:center;gap:6px}
+  .cart .qty button{width:28px;height:28px;border-radius:9px;border:1px solid var(--stroke);background:rgba(255,255,255,.12);color:#fff;font-size:16px;font-weight:800}
+  .cart .qty span{min-width:20px;text-align:center;font-weight:800}
+  .cart .empty-c{text-align:center;opacity:.6;font-size:13px;padding:10px}
+  .cart-total{display:flex;justify-content:space-between;align-items:center;padding:8px 4px 2px;font-weight:800;font-size:16px}
+  .addmenu{width:100%;background:rgba(47,191,113,.16);border:1px solid rgba(47,191,113,.5);color:#c9ffe0;border-radius:12px;padding:11px;font-size:14px;font-weight:700;margin-top:8px}
+  .pretoggle{display:flex;align-items:center;justify-content:space-between;background:rgba(160,107,255,.14);border:1px solid rgba(160,107,255,.45);border-radius:12px;padding:11px 14px;font-size:14px;font-weight:700;color:#e6d8ff;cursor:pointer}
+  .pretoggle.on{background:rgba(160,107,255,.28)}
+  /* menu picker overlay */
+  #menuPick{position:fixed;inset:0;z-index:210;display:none;flex-direction:column;background:#0f1220}
+  #menuPick.show{display:flex}
+  .mp-top{padding:calc(12px + env(safe-area-inset-top)) 14px 10px;background:rgba(20,22,40,.85);backdrop-filter:blur(14px);
+    display:flex;align-items:center;gap:10px;font-weight:800;font-size:16px;border-bottom:1px solid var(--stroke)}
+  .mp-cats{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;background:rgba(20,22,40,.6);white-space:nowrap}
+  .mp-cats button{flex:0 0 auto;background:rgba(255,255,255,.1);border:1px solid var(--stroke);color:#fff;border-radius:999px;padding:7px 13px;font-size:12.5px;font-weight:700}
+  .mp-cats button.sel{background:#fff;color:#10131f}
+  .mp-list{flex:1;overflow-y:auto;padding:8px 12px 12px}
+  .mp-cat-h{font-size:13px;font-weight:800;opacity:.8;margin:14px 4px 8px}
+  .mp-item{display:flex;align-items:center;gap:10px;background:var(--glass);border:1px solid var(--stroke);border-radius:14px;padding:11px 12px;margin-bottom:8px}
+  .mp-item .info{flex:1;min-width:0}
+  .mp-item .info .nm{font-size:14px;font-weight:700;line-height:1.25}
+  .mp-item .info .pr{font-size:12.5px;opacity:.85;margin-top:2px}
+  .mp-item .add{flex:0 0 auto;display:flex;align-items:center;gap:8px}
+  .mp-item .add button{width:32px;height:32px;border-radius:10px;border:none;background:linear-gradient(135deg,#ff7a9a,#ff9d6c);color:#fff;font-size:18px;font-weight:800}
+  .mp-item .add .q{min-width:20px;text-align:center;font-weight:800}
+  .mp-bot{padding:12px 14px calc(14px + env(safe-area-inset-bottom));background:rgba(20,22,40,.9);backdrop-filter:blur(14px);border-top:1px solid var(--stroke);display:flex;align-items:center;gap:12px}
+  .mp-bot .tot{flex:1;font-weight:800;font-size:16px}
+  .mp-bot .done{background:linear-gradient(135deg,#2fbf71,#1f9a58);border:none;color:#fff;font-size:15px;font-weight:800;padding:13px 22px;border-radius:14px}
 
   /* Map */
   #mapWrap{position:relative;height:44vh;min-height:280px;border-radius:22px;overflow:hidden;
@@ -144,9 +179,9 @@
     border:1px solid var(--stroke);border-radius:26px;box-shadow:var(--shadow);display:flex;padding:6px;z-index:50;overflow:hidden}
   .nav .pill{position:absolute;top:6px;height:54px;border-radius:20px;background:var(--white);opacity:.9;
     box-shadow:0 6px 16px rgba(0,0,0,.15);transition:left .28s cubic-bezier(.4,1.3,.5,1);z-index:0}
-  .nav button{flex:1;background:none;border:none;color:#fff;font-weight:700;font-size:12.5px;z-index:1;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative}
-  .nav button .ic{font-size:20px}
+  .nav button{flex:1;background:none;border:none;color:#fff;font-weight:700;font-size:10.5px;z-index:1;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;position:relative}
+  .nav button .ic{font-size:19px}
   .nav button.active{color:var(--ink)}
   .nav button .cnt{position:absolute;top:4px;margin-left:26px;background:var(--danger);color:#fff;font-size:10px;
     min-width:18px;height:18px;border-radius:9px;display:none;align-items:center;justify-content:center;padding:0 4px;font-weight:800}
@@ -165,6 +200,7 @@
   .field input,.field textarea{width:100%;background:rgba(255,255,255,.1);border:1px solid var(--stroke);
     border-radius:14px;padding:13px 14px;color:#fff;font-size:16px;font-family:inherit}
   .field input::placeholder,.field textarea::placeholder{color:rgba(255,255,255,.5)}
+  .field input[type=datetime-local]{color-scheme:dark}
   .field textarea{resize:none;height:60px}
   .quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
   .quick button{background:rgba(255,255,255,.12);border:1px solid var(--stroke);color:#fff;border-radius:12px;padding:8px 14px;font-size:13px;font-weight:600}
@@ -207,12 +243,20 @@
   <span class="pill" id="pill"></span>
   <button class="active" data-view="orders" onclick="switchView('orders')"><span class="ic">📋</span><span>ออร์เดอร์</span><span class="cnt" id="cntOrders"></span></button>
   <button data-view="rider" onclick="switchView('rider')"><span class="ic">🛵</span><span>ไรเดอร์</span><span class="cnt" id="cntRider"></span></button>
+  <button data-view="menu" onclick="switchView('menu')"><span class="ic">📖</span><span>เมนู</span></button>
   <button data-view="dorms" onclick="switchView('dorms')"><span class="ic">🏢</span><span>หอพัก</span></button>
   <button data-view="history" onclick="switchView('history')"><span class="ic">🧾</span><span>ประวัติ</span></button>
 </nav>
 
 <div class="modal-bg" id="modalBg"><div class="modal" id="modalBox"></div></div>
 <div class="toast" id="toast"></div>
+
+<div id="menuPick">
+  <div class="mp-top"><span>📖 เลือกเมนู</span></div>
+  <div class="mp-cats" id="mpCats"></div>
+  <div class="mp-list" id="mpList"></div>
+  <div class="mp-bot"><span class="tot" id="mpTot">฿0</span><button class="done" onclick="closeMenuPick()">✓ เสร็จ</button></div>
+</div>
 
 <div id="picker">
   <div class="picker-top" id="pickerTitle">ปักตำแหน่งจุดส่ง</div>
@@ -231,13 +275,21 @@
 /* ===== Config & storage ===== */
 const WARN_MIN=30, LATE_MIN=60, BKK=[13.7563,100.5018];
 const store={load(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},save(k,v){localStorage.setItem(k,JSON.stringify(v))}};
+const CAT_ORDER=['กุ้งเผา','เซตสุดฮิต','กุ้งเผา Set Max','อร่อยซ่ากับโค้ก','เมนูข้าว','Add On','ค่าส่ง [ ลงรายละเอียด ]'];
+const DEFAULT_MENU=[{"c":"กุ้งเผา","n":"กุ้งเผาไซส์กลาง [ 1 โล ]","p":400,"x":0},{"c":"กุ้งเผา","n":"กุ้งเผาไซส์กลาง [ ครึ่งโล ]","p":240,"x":0},{"c":"กุ้งเผา","n":"กุ้งหัวแก้ว 1 กิโล","p":450,"x":0},{"c":"กุ้งเผา","n":"กุ้งหัวแก้วครึ่งกิโล","p":260,"x":0},{"c":"กุ้งเผา","n":"กุ้งชีสเสียบไม้","p":175,"x":0},{"c":"กุ้งเผา","n":"หอยเชลล์อบชีส30ตัว","p":190,"x":0},{"c":"กุ้งเผา","n":"กุ้งอบเกลือครึ่งกิโลกรัม","p":190,"x":0},{"c":"กุ้งเผา","n":"กุ้งอบเกลือ 1 กิโล","p":350,"x":0},{"c":"กุ้งเผา","n":"กุ้งอบชีส ครึ่งกิโล","p":250,"x":0},{"c":"กุ้งเผา","n":"กุ้งเผาไซส์ใหญ่ [ ครึ่งกิโล ]","p":260,"x":0},{"c":"กุ้งเผา","n":"กุ้งเผา 1 กิโล","p":350,"x":0},{"c":"กุ้งเผา","n":"กุ้งเผาครึ่งโล","p":190,"x":0},{"c":"กุ้งเผา","n":"กุ้งเผาไซส์ใหญ่ [ 1 กิโล ]","p":450,"x":0},{"c":"กุ้งเผา","n":"กุ้งผ่าไซส์ใหญ่ ( ครึ่งโล )","p":260,"x":0},{"c":"กุ้งเผา","n":"กุ้งตามน้ำหนัก","p":0,"x":1},{"c":"เซตสุดฮิต","n":"[เซตสุดฮิต] กุ้งเผา 1 กิโล + น้ำจิ้มซีฟู้ด 1 กระปุก","p":515,"x":0},{"c":"เซตสุดฮิต","n":"[เซตสุดฮิต] กุ้งอบชีส ครึ่งกิโล + กุ้งเผา 1 กิโล + น้ำจิ้มซีฟู้ด1ถุง","p":880,"x":0},{"c":"เซตสุดฮิต","n":"[เซตสุดฮิต] กุ้งเผาครึ่งโล + กุ้งอบชีส ครึ่งกิโล","p":665,"x":0},{"c":"เซตสุดฮิต","n":"[เซตสุดฮิต] กุ้งเผา 1 กิโล + น้ำจิ้มซีฟู้ด1 กระปุก","p":505,"x":0},{"c":"กุ้งเผา Set Max","n":"กุ้งเผา set 3 กิโล","p":1050,"x":0},{"c":"กุ้งเผา Set Max","n":"กุ้งเผา 2 กิโล","p":700,"x":0},{"c":"กุ้งเผา Set Max","n":"[ Set คนรักกุ้ง ] กุ้งเผาครึ่งกิโล + กุ้งอบชีส 5 ตัว","p":460,"x":0},{"c":"อร่อยซ่ากับโค้ก","n":"[อร่อยซ่ากับโค้ก] [ Set คนรักกุ้ง ] กุ้งเผาครึ่งกิโล + กุ้งอบชีส 5 ตัว + โค้ก ออริจินัล (กระป๋อง)","p":485,"x":0},{"c":"อร่อยซ่ากับโค้ก","n":"[อร่อยซ่ากับโค้ก] กุ้งอบชีส ครึ่งกิโล + โค้ก ออริจินัล (กระป๋อง)","p":400,"x":0},{"c":"อร่อยซ่ากับโค้ก","n":"[อร่อยซ่ากับโค้ก] กุ้งเผา 1 กิโล + 2 โค้ก ออริจินัล (กระป๋อง)","p":530,"x":0},{"c":"อร่อยซ่ากับโค้ก","n":"[อร่อยซ่ากับโค้ก] กุ้งเผาครึ่งโล + โค้ก ออริจินัล (กระป๋อง)","p":315,"x":0},{"c":"เมนูข้าว","n":"ข้าวปูแกะ","p":169,"x":0},{"c":"เมนูข้าว","n":"อกปูซอง","p":40,"x":0},{"c":"เมนูข้าว","n":"ข้าวหน้ากุ้งแกะ L","p":180,"x":0},{"c":"เมนูข้าว","n":"ข้าวหน้ากุ้งแกะ S","p":130,"x":0},{"c":"เมนูข้าว","n":"ข้าวหน้ากุ้งอบเกลือ","p":130,"x":0},{"c":"เมนูข้าว","n":"ข้าวหน้ากุ้งผ่า L","p":180,"x":0},{"c":"เมนูข้าว","n":"ข้าวหน้ากุ้งผ่า S","p":130,"x":0},{"c":"เมนูข้าว","n":"ข้าวหน้ากุ้งเผา S","p":130,"x":0},{"c":"Add On","n":"มันปูซอง","p":40,"x":0},{"c":"Add On","n":"ข้าวเปล่า","p":10,"x":0},{"c":"Add On","n":"ชีส","p":40,"x":1},{"c":"Add On","n":"น้ำแข็ง","p":0,"x":1},{"c":"Add On","n":"น้ำจิ้มถุงเล็ก","p":10,"x":0},{"c":"Add On","n":"โค้กโอ่ง","p":25,"x":0},{"c":"Add On","n":"น้ำจิ้มซีฟู้ด 1 กระปุก","p":25,"x":0},{"c":"Add On","n":"โค้ก ออริจินัล (กระป๋อง)","p":15,"x":0},{"c":"ค่าส่ง [ ลงรายละเอียด ]","n":"เดอะพ้อยค่าส่ง40","p":0,"x":1},{"c":"ค่าส่ง [ ลงรายละเอียด ]","n":"ค่าส่ง","p":0,"x":1}];
 let orders=store.load('gp_orders',[]);
 let stops =store.load('gp_stops',[]);
 let dorms =store.load('gp_dorms',[]);
+let menu  =store.load('gp_menu',null);
+if(!menu){menu=DEFAULT_MENU.map(m=>({id:uid(),cat:m.c,name:m.n,price:m.p,custom:!!m.x}));}
 let view='orders';
 stops.forEach(s=>{if(!s.createdTs)s.createdTs=s.orderTs||Date.now();}); // backfill
-orders.forEach(o=>{if(!o.status)o.status=o.done?'done':'cooking';}); // status migration
-function persist(){store.save('gp_orders',orders);store.save('gp_stops',stops);store.save('gp_dorms',dorms);}
+orders.forEach(o=>{if(!o.status)o.status=o.done?'done':'cooking';if(!o.cart)o.cart=[];}); // migration
+function persist(){store.save('gp_orders',orders);store.save('gp_stops',stops);store.save('gp_dorms',dorms);store.save('gp_menu',menu);}
+function cartTotal(cart){return (cart||[]).reduce((s,l)=>s+l.price*l.qty,0);}
+function cartSummary(cart){return (cart||[]).map(l=>l.name+(l.qty>1?' x'+l.qty:'')).join(', ');}
+function baht(n){return '฿'+Number(n||0).toLocaleString('th-TH');}
+function fmtDT(ts){const d=new Date(ts);return d.toLocaleDateString('th-TH',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});}
 
 /* ===== helpers ===== */
 function fmtClock(){const d=new Date();document.getElementById('clock').textContent=
@@ -263,7 +315,8 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 /* ===== view switching ===== */
 function switchView(v){view=v;
   document.querySelectorAll('.nav button[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  document.getElementById('viewTitle').textContent={orders:'คิวออร์เดอร์',rider:'แผนที่ & ลำดับส่ง',dorms:'หอพักประจำ',history:'ประวัติออร์เดอร์'}[v];
+  document.getElementById('viewTitle').textContent={orders:'คิวออร์เดอร์',rider:'แผนที่ & ลำดับส่ง',menu:'เมนูอาหาร',dorms:'หอพักประจำ',history:'ประวัติออร์เดอร์'}[v];
+  document.getElementById('fab').style.display=(v==='history')?'none':'flex';
   movePill();render();}
 function movePill(){const nav=document.querySelector('.nav');const btns=[...nav.querySelectorAll('button[data-view]')];
   const idx=btns.findIndex(b=>b.dataset.view===view);const w=(nav.clientWidth-12)/btns.length;
@@ -272,25 +325,48 @@ function render(){
   if(view==='orders'){teardownMap();document.getElementById('main').innerHTML=renderOrders();}
   else if(view==='dorms'){teardownMap();document.getElementById('main').innerHTML=renderDorms();}
   else if(view==='history'){teardownMap();document.getElementById('main').innerHTML=renderHistory();}
+  else if(view==='menu'){teardownMap();document.getElementById('main').innerHTML=renderMenu();}
   else{renderRiderView();}
   updateBadges();}
 
 /* ===== ORDERS ===== */
+function orderLines(o){return esc(o.cart&&o.cart.length?cartSummary(o.cart):(o.items||'—'));}
+function orderTotal(o){return o.total!=null?o.total:cartTotal(o.cart);}
 function renderOrders(){
-  const active=orders.filter(o=>o.status==='cooking');let warn=0,late=0;
+  const active=orders.filter(o=>o.status==='cooking');
+  const pre=orders.filter(o=>o.status==='preorder').sort((a,b)=>a.preAt-b.preAt);
+  let warn=0,late=0;
   active.forEach(o=>{const m=elapsed(o.ts)/60;if(m>=LATE_MIN)late++;else if(m>=WARN_MIN)warn++;});
   let html=`<div class="summary">
      <div class="chip"><div class="n">${active.length}</div><div class="l">กำลังทำ</div></div>
      <div class="chip warn"><div class="n">${warn}</div><div class="l">เตือน 30-50น.</div></div>
      <div class="chip danger"><div class="n">${late}</div><div class="l">เกิน 1 ชม.</div></div></div>`;
-  if(!active.length)return html+`<div class="empty"><div class="big">🦐</div>ยังไม่มีออร์เดอร์<br>กดปุ่ม + เพื่อเพิ่มออร์เดอร์ใหม่</div>`;
+  // pre-order section
+  if(pre.length){
+    html+=`<div class="section-h">📅 พรีออเดอร์ (นัดล่วงหน้า) · ${pre.length}</div>`;
+    pre.forEach(o=>{const left=Math.round((o.preAt-Date.now())/60000);const soon=left<=30;
+      html+=`<div class="card plain" ${soon?'':'style=opacity:.92'}><div class="accent" style="background:#a06bff"></div>
+        <div class="row"><div>
+          <div class="title">${esc(o.name)}</div>
+          <div class="sub">${orderLines(o)}${o.dormId?' · 🏢 '+esc(dormName(o.dormId)):''}</div>
+          <span class="badge" style="background:rgba(160,107,255,.28);color:#e6d8ff">📅 ${fmtDT(o.preAt)}</span>
+          ${orderTotal(o)?`<span class="badge gray">${baht(orderTotal(o))}</span>`:''}</div>
+          <div class="timer"><div class="big" data-pre="${o.preAt}" style="font-size:20px;color:${soon?'#ffd0d8':'#e6d8ff'}">${preLeftText(o.preAt)}</div><div class="lbl">อีก</div></div></div>
+        <div class="actions">
+          <button class="btn go" onclick="activatePre('${o.id}')">▶ เริ่มทำเลย</button>
+          <button class="btn edit" onclick="editOrder('${o.id}')">✎</button>
+          <button class="btn del" onclick="delOrder('${o.id}')">🗑</button></div></div>`;});
+    if(active.length)html+=`<div class="section-h">🔥 กำลังทำ · ${active.length}</div>`;
+  }
+  if(!active.length&&!pre.length)return html+`<div class="empty"><div class="big">🦐</div>ยังไม่มีออร์เดอร์<br>กดปุ่ม + เพื่อเพิ่มออร์เดอร์ใหม่</div>`;
   active.sort((a,b)=>a.ts-b.ts);
-  active.forEach(o=>{const sec=elapsed(o.ts),min=sec/60,st=statusOf(min),deliver=!!o.dormId;
+  active.forEach(o=>{const sec=elapsed(o.ts),min=sec/60,st=statusOf(min),deliver=!!o.dormId,tot=orderTotal(o);
     html+=`<div class="card ${st}"><div class="accent"></div>
       <div class="row"><div>
         <div class="title">${esc(o.name)}</div>
-        <div class="sub">${o.items?esc(o.items):'—'}${o.ch?' · '+esc(o.ch):''}${o.phone?' · 📞 '+esc(o.phone):''}</div>
+        <div class="sub">${orderLines(o)}${o.ch?' · '+esc(o.ch):''}${o.phone?' · 📞 '+esc(o.phone):''}</div>
         ${deliver?`<span class="dorm">🏢 ${esc(dormName(o.dormId))}</span>`:''}
+        ${tot?`<span class="badge gray">${baht(tot)}</span>`:''}
         <span class="badge ${st}">${statusText(min)}</span></div>
         <div class="timer"><div class="big" data-ts="${o.ts}">${mmss(sec)}</div><div class="lbl">นาที</div></div></div>
       <div class="actions">
@@ -299,9 +375,12 @@ function renderOrders(){
         <button class="btn del" onclick="delOrder('${o.id}')">🗑</button></div></div>`;});
   return html;
 }
+function preLeftText(preAt){let m=Math.round((preAt-Date.now())/60000);if(m<=0)return'ถึงเวลา!';if(m<60)return m+' น.';const h=Math.floor(m/60);return h+' ชม.'+(m%60?' '+(m%60)+'น.':'');}
+function activatePre(id){const o=orders.find(x=>x.id===id);if(!o)return;o.status='cooking';o.ts=Date.now();o.preAt=null;persist();render();toast('เริ่มทำออร์เดอร์แล้ว 🔥');}
 function completeOrder(id){const o=orders.find(x=>x.id===id);if(!o)return;
   if(o.dormId){const d=dorms.find(x=>x.id===o.dormId);
-    stops.push({id:uid(),orderId:o.id,name:o.name,dormId:o.dormId,addr:d?d.addr:'',phone:o.phone||'',note:o.items||'',
+    const note=(o.cart&&o.cart.length?cartSummary(o.cart):'')+(o.note?(o.cart&&o.cart.length?' | ':'')+o.note:'')+(orderTotal(o)?' ('+baht(orderTotal(o))+')':'');
+    stops.push({id:uid(),orderId:o.id,name:o.name,dormId:o.dormId,addr:d?d.addr:'',phone:o.phone||'',note:note,
       lat:d?d.lat:null,lng:d?d.lng:null,orderTs:o.ts,createdTs:Date.now(),done:false,startedAt:null});
     o.status='delivering';o.done=false;toast('ส่งเข้าคิวไรเดอร์แล้ว 🛵');firstFit=true;}
   else{o.status='done';o.done=true;o.doneAt=Date.now();toast('ปิดออร์เดอร์แล้ว ✓');}
@@ -321,12 +400,13 @@ function renderHistory(){
     const dur=o.doneAt?Math.round((o.doneAt-o.ts)/60000):null;
     const t=new Date(o.doneAt||o.ts).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
     const dd=new Date(o.doneAt||o.ts).toLocaleDateString('th-TH',{day:'numeric',month:'short'});
-    const deliver=!!o.dormId;
+    const deliver=!!o.dormId,tot=orderTotal(o);
     html+=`<div class="card ok" style="opacity:.9"><div class="accent"></div>
       <div class="row"><div>
         <div class="title">${esc(o.name)}</div>
-        <div class="sub">${o.items?esc(o.items):'—'}${o.ch?' · '+esc(o.ch):''}</div>
+        <div class="sub">${orderLines(o)}${o.ch?' · '+esc(o.ch):''}</div>
         ${deliver?`<span class="dorm">🏢 ${esc(dormName(o.dormId))}</span>`:'<span class="badge gray">รับหน้าร้าน</span>'}
+        ${tot?`<span class="badge gray">${baht(tot)}</span>`:''}
         <span class="badge ok">${deliver?'ส่งสำเร็จ':'ปิดออร์เดอร์'}</span></div>
         <div class="timer"><div class="big" style="font-size:16px">${dd}</div><div class="lbl">${t} น.</div>
         ${dur!=null?`<div class="sm">รวม ${dur} นาที</div>`:''}</div></div></div>`;});
@@ -334,6 +414,41 @@ function renderHistory(){
 }
 function clearHistory(){if(!confirm('ล้างประวัติออร์เดอร์ที่ส่ง/ปิดแล้วทั้งหมด?'))return;
   orders=orders.filter(o=>o.status!=='done');persist();render();toast('ล้างประวัติแล้ว');}
+
+/* ===== MENU MANAGEMENT ===== */
+function renderMenu(){
+  let html=`<div style="text-align:center;font-size:13px;opacity:.8;margin:2px 0 12px">เมนู ${menu.length} รายการ · กด + เพิ่มเมนูใหม่ หรือแตะ ✎ เพื่อแก้ราคา</div>`;
+  const cats=[...CAT_ORDER.filter(c=>menu.some(m=>m.cat===c)),...[...new Set(menu.map(m=>m.cat))].filter(c=>!CAT_ORDER.includes(c))];
+  if(!menu.length)return html+`<div class="empty"><div class="big">📖</div>ยังไม่มีเมนู<br>กดปุ่ม + เพิ่มเมนู</div>`;
+  cats.forEach(cat=>{const items=menu.filter(m=>m.cat===cat);if(!items.length)return;
+    html+=`<div class="section-h">${esc(cat)} · ${items.length}</div>`;
+    items.forEach(m=>{html+=`<div class="card plain" style="padding:11px 14px"><div class="accent" style="background:#6f9bff"></div>
+      <div class="row"><div style="flex:1"><div class="title" style="font-size:15px">${esc(m.name)}</div>
+        <div class="sub">${m.custom?'💬 กำหนดราคาเอง':baht(m.price)}</div></div>
+        <div class="actions" style="margin:0;flex:0 0 auto;width:auto">
+          <button class="btn edit" onclick="openMenuItemModal('${m.id}')">✎</button>
+          <button class="btn del" onclick="delMenuItem('${m.id}')">🗑</button></div></div></div>`;});});
+  return html;
+}
+function delMenuItem(id){if(!confirm('ลบเมนูนี้?'))return;menu=menu.filter(m=>m.id!==id);persist();render();}
+function openMenuItemModal(edit){const m=edit?menu.find(x=>x.id===edit):null;
+  const cats=[...CAT_ORDER,...[...new Set(menu.map(x=>x.cat))].filter(c=>!CAT_ORDER.includes(c))];
+  document.getElementById('modalBox').innerHTML=`
+    <h2>${m?'✎ แก้ไขเมนู':'➕ เพิ่มเมนูใหม่'}</h2>
+    <div class="field"><label>ชื่อเมนู</label><input id="miName" autocomplete="off" placeholder="เช่น กุ้งเผา 1 กิโล" value="${m?esc(m.name):''}"></div>
+    <div class="field"><label>หมวดหมู่</label><div class="quick" id="miCats">
+      ${cats.map(c=>`<button type="button" class="${m&&m.cat===c?'sel':(!m&&c==='กุ้งเผา'?'sel':'')}" onclick="pick(this,'${esc(c)}','miCatVal')">${esc(c)}</button>`).join('')}
+      </div><input type="hidden" id="miCatVal" value="${m?esc(m.cat):'กุ้งเผา'}"></div>
+    <div class="field"><label>ราคา (บาท)</label><input id="miPrice" inputmode="decimal" placeholder="เช่น 350" value="${m&&!m.custom?m.price:''}"></div>
+    <div class="field"><div class="pretoggle ${m&&m.custom?'on':''}" id="miCustom" onclick="this.classList.toggle('on')" style="background:rgba(255,255,255,.08);border-color:var(--stroke);color:#fff"><span>💬 กำหนดราคาเองตอนขาย (เช่น ค่าส่ง, กุ้งตามน้ำหนัก)</span></div></div>
+    <button class="save" onclick="saveMenuItem('${edit||''}')">${m?'บันทึก':'เพิ่มเมนู +'}</button>
+    <button class="cancel" onclick="closeModal()">ยกเลิก</button>`;
+  document.getElementById('modalBg').classList.add('show');if(!m)setTimeout(()=>document.getElementById('miName').focus(),300);}
+function saveMenuItem(edit){const name=document.getElementById('miName').value.trim();if(!name){document.getElementById('miName').focus();return;}
+  const custom=document.getElementById('miCustom').classList.contains('on');
+  const data={cat:document.getElementById('miCatVal').value||'กุ้งเผา',name,custom,price:custom?0:(parseFloat(document.getElementById('miPrice').value)||0)};
+  if(edit){Object.assign(menu.find(x=>x.id===edit),data);}else menu.push(Object.assign({id:uid()},data));
+  persist();closeModal();render();toast('บันทึกเมนูแล้ว 📖');}
 
 /* ===== DORMS ===== */
 function renderDorms(){
@@ -472,7 +587,7 @@ function navRoute(){const pins=pendingWithCoords();if(!pins.length)return;
   window.open(url,'_blank');}
 
 /* ===== Modals ===== */
-document.getElementById('fab').onclick=()=>view==='orders'?openOrderModal():view==='dorms'?openDormModal():openStopModal();
+document.getElementById('fab').onclick=()=>view==='orders'?openOrderModal():view==='dorms'?openDormModal():view==='menu'?openMenuItemModal():view==='rider'?openStopModal():null;
 function closeModal(){document.getElementById('modalBg').classList.remove('show');}
 document.getElementById('modalBg').onclick=e=>{if(e.target.id==='modalBg')closeModal();};
 function pick(el,val,hid){document.getElementById(hid).value=val;el.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
@@ -490,34 +605,82 @@ function quickAddDorm(hid){openPicker(lastPos,(lat,lng)=>{const name=prompt('ช
     const btns=box.querySelectorAll('button');const target=[...btns].find(b=>b.textContent.includes(d.name));if(target)pickDorm(target,d.id,hid);}
   toast('เพิ่มหอพักแล้ว 🏢');});}
 
+let orderCart=[];
 function openOrderModal(edit){
   const o=edit?orders.find(x=>x.id===edit):null;
+  orderCart=o&&o.cart?o.cart.map(l=>({menuId:l.menuId||null,name:l.name,price:l.price,qty:l.qty,custom:l.custom||false})):[];
+  const preVal=o&&o.preAt?dtLocal(o.preAt):'';
   document.getElementById('modalBox').innerHTML=`
     <h2>${o?'✎ แก้ไขออร์เดอร์':'➕ เพิ่มออร์เดอร์ใหม่'}</h2>
     <div class="field"><label>ชื่อ / เลขออร์เดอร์</label><input id="mName" placeholder="เช่น คุณเอ #A102" autocomplete="off" value="${o?esc(o.name):''}"></div>
-    <div class="field"><label>รายการ (ไม่บังคับ)</label><textarea id="mItems" placeholder="เช่น กุ้งเผา 1 กก. + ยำ 1">${o?esc(o.items||''):''}</textarea></div>
+    <div class="field"><label>รายการอาหาร</label><div class="cart" id="cartBox"></div>
+      <button class="addmenu" onclick="openMenuPick()">➕ เพิ่มเมนู</button></div>
+    <div class="field"><label>หมายเหตุ (ไม่บังคับ)</label><textarea id="mItems" placeholder="เช่น ไม่เอาผัก / เผาให้สุกมาก">${o?esc(o.note||''):''}</textarea></div>
     <div class="field"><label>ส่งที่หอพัก (ถ้าเป็นเดลิเวอรี่)</label><div class="quick" id="mDormChips">${dormChipsHtml('mDormVal')}</div><input type="hidden" id="mDormVal" value="${o?esc(o.dormId||''):''}"></div>
     <div class="field"><label>เบอร์ลูกค้า (ไม่บังคับ)</label><input id="mPhone" inputmode="tel" placeholder="08x-xxx-xxxx" autocomplete="off" value="${o?esc(o.phone||''):''}"></div>
     <div class="field"><label>ช่องทาง</label><div class="quick" id="mChBox">
       ${['หน้าร้าน','โทร','LINE','เดลิเวอรี่'].map(c=>`<button type="button" class="${o&&o.ch===c?'sel':''}" onclick="pick(this,'${c}','mChVal')">${c}</button>`).join('')}
       </div><input type="hidden" id="mChVal" value="${o?esc(o.ch||''):''}"></div>
-    <button class="save" onclick="saveOrder('${edit||''}')">${o?'บันทึก':'เริ่มจับเวลา ▶'}</button>
+    <div class="field"><div class="pretoggle ${preVal?'on':''}" id="preToggle" onclick="togglePre()"><span>📅 พรีออเดอร์ (นัดเวลา)</span><span id="preState">${preVal?'เปิด':'ปิด'}</span></div>
+      <div id="preWrap" style="margin-top:8px;${preVal?'':'display:none'}"><input type="datetime-local" id="mPre" value="${preVal}"></div></div>
+    <button class="save" onclick="saveOrder('${edit||''}')">${o?'บันทึก':'บันทึกออร์เดอร์ ▶'}</button>
     <button class="cancel" onclick="closeModal()">ยกเลิก</button>`;
-  // preselect dorm chip
   const dv=o?o.dormId:'';const box=document.getElementById('mDormChips');
   [...box.querySelectorAll('button')].forEach(b=>b.classList.remove('sel'));
   if(dv){const t=[...box.querySelectorAll('button')].find(b=>b.textContent.includes(dormName(dv)));if(t)t.classList.add('sel');}
   else box.querySelector('button').classList.add('sel');
+  renderOrderCart();
   document.getElementById('modalBg').classList.add('show');
   if(!o)setTimeout(()=>document.getElementById('mName').focus(),300);
 }
 function editOrder(id){openOrderModal(id);}
+function dtLocal(ts){const d=new Date(ts-d0());return d.toISOString().slice(0,16);}
+function d0(){return new Date().getTimezoneOffset()*60000;}
+function togglePre(){const t=document.getElementById('preToggle'),w=document.getElementById('preWrap');
+  const on=!t.classList.contains('on');t.classList.toggle('on',on);document.getElementById('preState').textContent=on?'เปิด':'ปิด';w.style.display=on?'block':'none';
+  if(on&&!document.getElementById('mPre').value){const d=new Date(Date.now()+3600000-d0());document.getElementById('mPre').value=d.toISOString().slice(0,16);}}
+function renderOrderCart(){const box=document.getElementById('cartBox');if(!box)return;
+  if(!orderCart.length){box.innerHTML='<div class="empty-c">ยังไม่ได้เลือกเมนู — กด "เพิ่มเมนู"</div>';return;}
+  let h='';orderCart.forEach((l,i)=>{h+=`<div class="line"><div class="nm">${esc(l.name)}</div><div class="pr">${baht(l.price*l.qty)}</div>
+    <div class="qty"><button onclick="cartQty(${i},-1)">−</button><span>${l.qty}</span><button onclick="cartQty(${i},1)">+</button></div></div>`;});
+  h+=`<div class="cart-total"><span>รวม</span><span>${baht(cartTotal(orderCart))}</span></div>`;box.innerHTML=h;}
+function cartQty(i,d){const l=orderCart[i];if(!l)return;l.qty+=d;if(l.qty<=0)orderCart.splice(i,1);renderOrderCart();if(document.getElementById('menuPick').classList.contains('show'))renderMenuPick();}
 function saveOrder(edit){const name=document.getElementById('mName').value.trim();if(!name){document.getElementById('mName').focus();return;}
-  const data={name,items:document.getElementById('mItems').value.trim(),dormId:document.getElementById('mDormVal').value||null,
-    phone:document.getElementById('mPhone').value.trim(),ch:document.getElementById('mChVal').value};
-  if(edit){const o=orders.find(x=>x.id===edit);Object.assign(o,data);}
-  else orders.push(Object.assign({id:uid(),ts:Date.now(),done:false},data));
-  persist();closeModal();render();}
+  const preOn=document.getElementById('preToggle').classList.contains('on');const preV=document.getElementById('mPre').value;
+  let preAt=(preOn&&preV)?new Date(preV).getTime():null;
+  const cart=orderCart.map(l=>({menuId:l.menuId,name:l.name,price:l.price,qty:l.qty,custom:l.custom}));
+  const data={name,cart,total:cartTotal(cart),note:document.getElementById('mItems').value.trim(),
+    dormId:document.getElementById('mDormVal').value||null,phone:document.getElementById('mPhone').value.trim(),ch:document.getElementById('mChVal').value,preAt};
+  if(edit){const o=orders.find(x=>x.id===edit);Object.assign(o,data);
+    if(preAt&&preAt>Date.now()){o.status='preorder';}else if(o.status==='preorder'){o.status='cooking';o.ts=Date.now();}}
+  else{const status=(preAt&&preAt>Date.now())?'preorder':'cooking';
+    orders.push(Object.assign({id:uid(),createdAt:Date.now(),ts:status==='cooking'?Date.now():null,done:false,status},data));}
+  persist();closeModal();render();toast(preAt&&preAt>Date.now()?'บันทึกพรีออเดอร์แล้ว 📅':'บันทึกออร์เดอร์แล้ว ✓');}
+
+/* ===== menu picker overlay ===== */
+let mpCat='ทั้งหมด';
+function openMenuPick(){mpCat='ทั้งหมด';document.getElementById('menuPick').classList.add('show');renderMenuPick();}
+function closeMenuPick(){document.getElementById('menuPick').classList.remove('show');renderOrderCart();}
+function renderMenuPick(){
+  const cats=['ทั้งหมด',...CAT_ORDER.filter(c=>menu.some(m=>m.cat===c)),...[...new Set(menu.map(m=>m.cat))].filter(c=>!CAT_ORDER.includes(c))];
+  document.getElementById('mpCats').innerHTML=cats.map(c=>`<button class="${c===mpCat?'sel':''}" onclick="mpPick('${esc(c).replace(/'/g,"")}')">${esc(c)}</button>`).join('');
+  const list=document.getElementById('mpList');let h='';
+  const groups=(mpCat==='ทั้งหมด'?cats.slice(1):[mpCat]);
+  groups.forEach(cat=>{const items=menu.filter(m=>m.cat===cat);if(!items.length)return;
+    h+=`<div class="mp-cat-h">${esc(cat)}</div>`;
+    items.forEach(m=>{const line=orderCart.find(l=>l.menuId===m.id);const q=line?line.qty:0;
+      h+=`<div class="mp-item"><div class="info"><div class="nm">${esc(m.name)}</div><div class="pr">${m.custom?'💬 กำหนดราคาเอง':baht(m.price)}</div></div>
+        <div class="add">${q?`<button onclick="mpQty('${m.id}',-1)">−</button><span class="q">${q}</span>`:''}<button onclick="mpQty('${m.id}',1)">+</button></div></div>`;});});
+  list.innerHTML=h||'<div class="empty-c" style="padding:30px">ไม่มีเมนูในหมวดนี้</div>';
+  document.getElementById('mpTot').textContent=baht(cartTotal(orderCart));
+}
+function mpPick(c){mpCat=c;renderMenuPick();}
+function mpQty(menuId,d){const m=menu.find(x=>x.id===menuId);if(!m)return;
+  let line=orderCart.find(l=>l.menuId===menuId);
+  if(d>0&&!line){let price=m.price;if(m.custom){const v=prompt('ใส่ราคา/จำนวนเงิน (บาท) สำหรับ '+m.name,m.price||'');if(v===null)return;price=parseFloat(v)||0;}
+    orderCart.push({menuId:m.id,name:m.name,price,qty:1,custom:m.custom});}
+  else if(line){line.qty+=d;if(line.qty<=0)orderCart.splice(orderCart.indexOf(line),1);}
+  renderMenuPick();}
 
 let stagedLoc=null;
 function openStopModal(){stagedLoc=null;
@@ -569,15 +732,21 @@ function editStopLoc(id){const s=stops.find(x=>x.id===id);if(!s)return;openPicke
 /* ===== tick ===== */
 function tick(){
   document.querySelectorAll('.timer .big[data-ts]').forEach(el=>{const sec=elapsed(+el.dataset.ts);el.textContent=mmss(sec);
-    const card=el.closest('.card'),min=sec/60,st=statusOf(min);card.className='card '+st;
-    const b=card.querySelector('.badge');if(b){b.className='badge '+st;b.textContent=statusText(min);}});
+    const card=el.closest('.card'),min=sec/60,st=statusOf(min);TIER_CLS.forEach(c=>card.classList.remove(c));card.classList.add(st);
+    const b=card.querySelector('.badge:not(.gray)');if(b){b.className='badge '+st;b.textContent=statusText(min);}});
   document.querySelectorAll('.timer .big[data-base]').forEach(el=>{const sec=elapsed(+el.dataset.base);el.textContent=mmss(sec);
     const card=el.closest('.card');if(card&&!card.style.opacity){const min=sec/60,st=statusOf(min);
       TIER_CLS.forEach(c=>card.classList.remove(c));card.classList.add(st);
       const b=card.querySelector('.badge:not(.gray)');if(b){b.className='badge '+st;b.textContent=statusText(min);}}});
+  document.querySelectorAll('.timer .big[data-pre]').forEach(el=>{el.textContent=preLeftText(+el.dataset.pre);});
   document.querySelectorAll('[data-onway]').forEach(el=>{el.textContent=mmss(elapsed(+el.dataset.onway));});
-  updateBadges();checkAlerts();}
-let alerted={};
+  checkPre();updateBadges();checkAlerts();}
+let alerted={},preAlerted={};
+function checkPre(){let changed=false;
+  orders.filter(o=>o.status==='preorder').forEach(o=>{const left=o.preAt-Date.now();
+    if(left<=0){o.status='cooking';o.ts=Date.now();o.preAt=null;buzz([220,100,220,100,220]);toast('⏰ ถึงเวลาทำพรีออเดอร์: '+o.name);changed=true;}
+    else if(left<=15*60000&&!preAlerted[o.id]){preAlerted[o.id]=1;buzz([160,80,160]);toast('📅 อีก 15 นาที ถึงคิวพรีออเดอร์: '+o.name);}});
+  if(changed){persist();if(view==='orders')render();}}
 function checkAlerts(){orders.filter(o=>o.status==='cooking').forEach(o=>{const lvl=alertLevel(elapsed(o.ts)/60);
   const prev=alerted[o.id]||0;if(lvl>prev){alerted[o.id]=lvl;buzz(lvl>=4?[220,100,220,100,220]:lvl>=3?[180,90,180]:lvl>=2?[140,70,140]:[120]);}});}
 function buzz(p){if(navigator.vibrate)navigator.vibrate(p);}
