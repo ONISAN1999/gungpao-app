@@ -220,6 +220,26 @@
   .picker-bot button{flex:1;border-radius:15px;padding:14px;font-size:15px;font-weight:800;border:1px solid var(--stroke);color:#fff;background:var(--glass-strong)}
   .picker-bot .ok{flex:2;background:linear-gradient(135deg,#2fbf71,#1f9a58);border-color:transparent}
   .picker-locate{position:absolute;right:16px;bottom:96px;width:50px;height:50px;border-radius:16px;z-index:602;background:rgba(20,22,40,.8);border:1px solid var(--stroke);color:#fff;font-size:22px;box-shadow:var(--shadow)}
+  /* login */
+  #login{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;padding:24px;
+    background:radial-gradient(1200px 600px at 20% 10%, #ff8fb1 0%, transparent 45%),
+               radial-gradient(1000px 700px at 90% 20%, #ffd18f 0%, transparent 40%),
+               radial-gradient(1000px 800px at 50% 100%, #8fb8ff 0%, transparent 45%),#0f1220}
+  #login.show{display:flex}
+  .login-box{width:100%;max-width:360px;text-align:center;background:var(--glass-strong);backdrop-filter:blur(26px);
+    border:1px solid var(--stroke);border-radius:28px;padding:30px 22px 26px;box-shadow:var(--shadow)}
+  .login-logo{font-size:54px;line-height:1}
+  .login-title{font-size:22px;font-weight:800;margin-top:8px}
+  .login-sub{font-size:13px;opacity:.85;margin:4px 0 20px}
+  .login-opts{display:flex;flex-direction:column;gap:10px}
+  .login-opt{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.12);border:1px solid var(--stroke);
+    color:#fff;border-radius:16px;padding:15px 18px;font-size:16px;font-weight:700;text-align:left}
+  .login-opt:active{transform:scale(.97);background:#fff;color:var(--ink)}
+  .login-opt .ic{font-size:24px}
+  .userchip{position:absolute;top:calc(10px + env(safe-area-inset-top));right:14px;background:var(--glass-strong);
+    border:1px solid var(--stroke);color:#fff;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;
+    backdrop-filter:blur(12px);display:flex;align-items:center;gap:5px}
+  .userchip:active{transform:scale(.95)}
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:180px;background:rgba(30,33,52,.95);border:1px solid var(--stroke);
     color:#fff;padding:12px 20px;border-radius:16px;font-weight:700;font-size:14px;z-index:300;box-shadow:var(--shadow);opacity:0;transition:opacity .3s,transform .3s;pointer-events:none}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-8px)}
@@ -228,11 +248,21 @@
 <body>
 <div class="bg-mesh"><div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div></div>
 
+<div id="login" class="show">
+  <div class="login-box">
+    <div class="login-logo">🦐</div>
+    <div class="login-title">ร้านกุ้งเผาบังฟาน</div>
+    <div class="login-sub">เลือกผู้ใช้เพื่อเข้าระบบ</div>
+    <div class="login-opts" id="loginOpts"></div>
+  </div>
+</div>
+
 <div class="app">
   <header class="top">
     <div class="brand">🦐 ร้านกุ้งเผา</div>
     <h1 id="viewTitle">คิวออร์เดอร์</h1>
     <div class="clock" id="clock"></div>
+    <button class="userchip" id="userChip" onclick="logout()"></button>
   </header>
   <main id="main"></main>
 </div>
@@ -282,6 +312,8 @@ let stops =store.load('gp_stops',[]);
 let dorms =store.load('gp_dorms',[]);
 let menu  =store.load('gp_menu',null);
 if(!menu){menu=DEFAULT_MENU.map(m=>({id:uid(),cat:m.c,name:m.n,price:m.p,custom:!!m.x}));}
+let currentUser=store.load('gp_user','');
+const USERS=[{n:'POS บังฟาน',i:'🖥️'},{n:'น้ำ',i:'👩'},{n:'บิ๊ก',i:'🧑'},{n:'พนักงาน',i:'👤'}];
 let view='orders';
 stops.forEach(s=>{if(!s.createdTs)s.createdTs=s.orderTs||Date.now();}); // backfill
 orders.forEach(o=>{if(!o.status)o.status=o.done?'done':'cooking';if(!o.cart)o.cart=[];}); // migration
@@ -364,13 +396,13 @@ function renderOrders(){
     html+=`<div class="card ${st}"><div class="accent"></div>
       <div class="row"><div>
         <div class="title">${esc(o.name)}</div>
-        <div class="sub">${orderLines(o)}${o.ch?' · '+esc(o.ch):''}${o.phone?' · 📞 '+esc(o.phone):''}</div>
+        <div class="sub">${orderLines(o)}${o.ch?' · '+esc(o.ch):''}${o.phone?' · 📞 '+esc(o.phone):''}${o.by?' · 👤'+esc(o.by):''}</div>
         ${deliver?`<span class="dorm">🏢 ${esc(dormName(o.dormId))}</span>`:''}
         ${tot?`<span class="badge gray">${baht(tot)}</span>`:''}
         <span class="badge ${st}">${statusText(min)}</span></div>
         <div class="timer"><div class="big" data-ts="${o.ts}">${mmss(sec)}</div><div class="lbl">นาที</div></div></div>
       <div class="actions">
-        <button class="btn ${deliver?'go':'done'}" onclick="completeOrder('${o.id}')">${deliver?'🛵 พร้อมส่ง → คิวไรเดอร์':'✓ เสร็จ'}</button>
+        <button class="btn go" onclick="completeOrder('${o.id}')">🛵 พร้อมส่ง → ไรเดอร์</button>
         <button class="btn edit" onclick="editOrder('${o.id}')">✎</button>
         <button class="btn del" onclick="delOrder('${o.id}')">🗑</button></div></div>`;});
   return html;
@@ -378,13 +410,12 @@ function renderOrders(){
 function preLeftText(preAt){let m=Math.round((preAt-Date.now())/60000);if(m<=0)return'ถึงเวลา!';if(m<60)return m+' น.';const h=Math.floor(m/60);return h+' ชม.'+(m%60?' '+(m%60)+'น.':'');}
 function activatePre(id){const o=orders.find(x=>x.id===id);if(!o)return;o.status='cooking';o.ts=Date.now();o.preAt=null;persist();render();toast('เริ่มทำออร์เดอร์แล้ว 🔥');}
 function completeOrder(id){const o=orders.find(x=>x.id===id);if(!o)return;
-  if(o.dormId){const d=dorms.find(x=>x.id===o.dormId);
-    const note=(o.cart&&o.cart.length?cartSummary(o.cart):'')+(o.note?(o.cart&&o.cart.length?' | ':'')+o.note:'')+(orderTotal(o)?' ('+baht(orderTotal(o))+')':'');
-    stops.push({id:uid(),orderId:o.id,name:o.name,dormId:o.dormId,addr:d?d.addr:'',phone:o.phone||'',note:note,
-      lat:d?d.lat:null,lng:d?d.lng:null,orderTs:o.ts,createdTs:Date.now(),done:false,startedAt:null});
-    o.status='delivering';o.done=false;toast('ส่งเข้าคิวไรเดอร์แล้ว 🛵');firstFit=true;}
-  else{o.status='done';o.done=true;o.doneAt=Date.now();toast('ปิดออร์เดอร์แล้ว ✓');}
-  persist();buzz([60]);render();}
+  const d=o.dormId?dorms.find(x=>x.id===o.dormId):null;
+  const note=(o.cart&&o.cart.length?cartSummary(o.cart):'')+(o.note?(o.cart&&o.cart.length?' | ':'')+o.note:'')+(orderTotal(o)?' ('+baht(orderTotal(o))+')':'');
+  stops.push({id:uid(),orderId:o.id,name:o.name,dormId:o.dormId||null,addr:d?d.addr:'',phone:o.phone||'',note:note,
+    lat:d?d.lat:null,lng:d?d.lng:null,orderTs:o.ts,createdTs:Date.now(),done:false,startedAt:null}); // orderTs=o.ts → เวลานับต่อเนื่อง
+  o.status='delivering';o.done=false;firstFit=true;
+  persist();buzz([60]);render();toast('พร้อมส่ง → เข้าคิวไรเดอร์ 🛵');}
 function delOrder(id){orders=orders.filter(x=>x.id!==id);persist();render();}
 
 /* ===== HISTORY ===== */
@@ -654,7 +685,7 @@ function saveOrder(edit){const name=document.getElementById('mName').value.trim(
   if(edit){const o=orders.find(x=>x.id===edit);Object.assign(o,data);
     if(preAt&&preAt>Date.now()){o.status='preorder';}else if(o.status==='preorder'){o.status='cooking';o.ts=Date.now();}}
   else{const status=(preAt&&preAt>Date.now())?'preorder':'cooking';
-    orders.push(Object.assign({id:uid(),createdAt:Date.now(),ts:status==='cooking'?Date.now():null,done:false,status},data));}
+    orders.push(Object.assign({id:uid(),createdAt:Date.now(),ts:status==='cooking'?Date.now():null,done:false,status,by:currentUser},data));}
   persist();closeModal();render();toast(preAt&&preAt>Date.now()?'บันทึกพรีออเดอร์แล้ว 📅':'บันทึกออร์เดอร์แล้ว ✓');}
 
 /* ===== menu picker overlay ===== */
@@ -754,8 +785,18 @@ function updateBadges(){const oLate=orders.filter(o=>o.status==='cooking'&&elaps
   const co=document.getElementById('cntOrders');co.textContent=oLate;co.parentNode.classList.toggle('hasnew',oLate>0);
   const rPend=stops.filter(s=>!s.done).length;const cr=document.getElementById('cntRider');cr.textContent=rPend;cr.parentNode.classList.toggle('hasnew',rPend>0);}
 
+/* ===== login ===== */
+function renderLoginOpts(){document.getElementById('loginOpts').innerHTML=USERS.map(u=>
+  `<button class="login-opt" onclick="doLogin('${u.n}')"><span class="ic">${u.i}</span><span>${u.n}</span></button>`).join('');}
+function showLogin(){renderLoginOpts();document.getElementById('login').classList.add('show');}
+function doLogin(name){currentUser=name;store.save('gp_user',name);document.getElementById('login').classList.remove('show');updateUserChip();toast('เข้าระบบเป็น '+name);}
+function logout(){showLogin();}
+function updateUserChip(){const c=document.getElementById('userChip');const u=USERS.find(x=>x.n===currentUser);
+  c.textContent=(u?u.i:'👤')+' '+(currentUser||'เลือกผู้ใช้');}
+
 /* ===== boot ===== */
 fmtClock();setInterval(fmtClock,10000);setInterval(tick,1000);
+updateUserChip();showLogin();
 window.addEventListener('resize',movePill);movePill();render();
 
 /* ===== PWA ===== */
