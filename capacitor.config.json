@@ -1,0 +1,8 @@
+{
+  "appId": "com.gungpao.app",
+  "appName": "ร้านกุ้งเผา",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true
+  }
+}
