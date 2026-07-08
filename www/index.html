@@ -313,7 +313,7 @@ let dorms =store.load('gp_dorms',[]);
 let menu  =store.load('gp_menu',null);
 if(!menu){menu=DEFAULT_MENU.map(m=>({id:uid(),cat:m.c,name:m.n,price:m.p,custom:!!m.x}));}
 let currentUser=store.load('gp_user','');
-const USERS=[{n:'POS บังฟาน',i:'🖥️'},{n:'น้ำ',i:'👩'},{n:'บิ๊ก',i:'🧑'},{n:'พนักงาน',i:'👤'}];
+const USERS=[{n:'POS',i:'🖥️'},{n:'บังฟาน',i:'🧔'},{n:'น้ำ',i:'👩'},{n:'บิ๊ก',i:'🧑'},{n:'พนักงาน',i:'👤'}];
 let view='orders';
 stops.forEach(s=>{if(!s.createdTs)s.createdTs=s.orderTs||Date.now();}); // backfill
 orders.forEach(o=>{if(!o.status)o.status=o.done?'done':'cooking';if(!o.cart)o.cart=[];}); // migration
