@@ -103,6 +103,7 @@
   .toolbar button{flex:1;background:var(--glass);border:1px solid var(--stroke);color:#fff;border-radius:14px;
     padding:10px;font-size:13px;font-weight:700;backdrop-filter:blur(12px)}
   .toolbar button:active{transform:scale(.97)}
+  .toolbar button.navbtn{background:linear-gradient(135deg,#22c1c3,#3a86ff);border-color:transparent;color:#fff}
 
   /* Map */
   #mapWrap{position:relative;height:44vh;min-height:280px;border-radius:22px;overflow:hidden;
@@ -207,6 +208,7 @@
   <button class="active" data-view="orders" onclick="switchView('orders')"><span class="ic">📋</span><span>ออร์เดอร์</span><span class="cnt" id="cntOrders"></span></button>
   <button data-view="rider" onclick="switchView('rider')"><span class="ic">🛵</span><span>ไรเดอร์</span><span class="cnt" id="cntRider"></span></button>
   <button data-view="dorms" onclick="switchView('dorms')"><span class="ic">🏢</span><span>หอพัก</span></button>
+  <button data-view="history" onclick="switchView('history')"><span class="ic">🧾</span><span>ประวัติ</span></button>
 </nav>
 
 <div class="modal-bg" id="modalBg"><div class="modal" id="modalBox"></div></div>
@@ -234,6 +236,7 @@ let stops =store.load('gp_stops',[]);
 let dorms =store.load('gp_dorms',[]);
 let view='orders';
 stops.forEach(s=>{if(!s.createdTs)s.createdTs=s.orderTs||Date.now();}); // backfill
+orders.forEach(o=>{if(!o.status)o.status=o.done?'done':'cooking';}); // status migration
 function persist(){store.save('gp_orders',orders);store.save('gp_stops',stops);store.save('gp_dorms',dorms);}
 
 /* ===== helpers ===== */
@@ -260,7 +263,7 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 /* ===== view switching ===== */
 function switchView(v){view=v;
   document.querySelectorAll('.nav button[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
-  document.getElementById('viewTitle').textContent={orders:'คิวออร์เดอร์',rider:'แผนที่ & ลำดับส่ง',dorms:'หอพักประจำ'}[v];
+  document.getElementById('viewTitle').textContent={orders:'คิวออร์เดอร์',rider:'แผนที่ & ลำดับส่ง',dorms:'หอพักประจำ',history:'ประวัติออร์เดอร์'}[v];
   movePill();render();}
 function movePill(){const nav=document.querySelector('.nav');const btns=[...nav.querySelectorAll('button[data-view]')];
   const idx=btns.findIndex(b=>b.dataset.view===view);const w=(nav.clientWidth-12)/btns.length;
@@ -268,12 +271,13 @@ function movePill(){const nav=document.querySelector('.nav');const btns=[...nav.
 function render(){
   if(view==='orders'){teardownMap();document.getElementById('main').innerHTML=renderOrders();}
   else if(view==='dorms'){teardownMap();document.getElementById('main').innerHTML=renderDorms();}
+  else if(view==='history'){teardownMap();document.getElementById('main').innerHTML=renderHistory();}
   else{renderRiderView();}
   updateBadges();}
 
 /* ===== ORDERS ===== */
 function renderOrders(){
-  const active=orders.filter(o=>!o.done);let warn=0,late=0;
+  const active=orders.filter(o=>o.status==='cooking');let warn=0,late=0;
   active.forEach(o=>{const m=elapsed(o.ts)/60;if(m>=LATE_MIN)late++;else if(m>=WARN_MIN)warn++;});
   let html=`<div class="summary">
      <div class="chip"><div class="n">${active.length}</div><div class="l">กำลังทำ</div></div>
@@ -297,12 +301,39 @@ function renderOrders(){
 }
 function completeOrder(id){const o=orders.find(x=>x.id===id);if(!o)return;
   if(o.dormId){const d=dorms.find(x=>x.id===o.dormId);
-    stops.push({id:uid(),name:o.name,dormId:o.dormId,addr:d?d.addr:'',phone:o.phone||'',note:o.items||'',
+    stops.push({id:uid(),orderId:o.id,name:o.name,dormId:o.dormId,addr:d?d.addr:'',phone:o.phone||'',note:o.items||'',
       lat:d?d.lat:null,lng:d?d.lng:null,orderTs:o.ts,createdTs:Date.now(),done:false,startedAt:null});
-    toast('ส่งเข้าคิวไรเดอร์แล้ว 🛵');firstFit=true;}
-  else toast('ปิดออร์เดอร์แล้ว ✓');
-  o.done=true;o.doneAt=Date.now();persist();buzz([60]);render();}
+    o.status='delivering';o.done=false;toast('ส่งเข้าคิวไรเดอร์แล้ว 🛵');firstFit=true;}
+  else{o.status='done';o.done=true;o.doneAt=Date.now();toast('ปิดออร์เดอร์แล้ว ✓');}
+  persist();buzz([60]);render();}
 function delOrder(id){orders=orders.filter(x=>x.id!==id);persist();render();}
+
+/* ===== HISTORY ===== */
+function renderHistory(){
+  const done=orders.filter(o=>o.status==='done').sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));
+  let html=`<div class="summary">
+     <div class="chip"><div class="n">${done.length}</div><div class="l">ส่ง/ปิดแล้ว</div></div>
+     <div class="chip"><div class="n">${orders.filter(o=>o.status==='delivering').length}</div><div class="l">กำลังส่ง</div></div>
+     <div class="chip"><div class="n">${orders.filter(o=>o.status==='cooking').length}</div><div class="l">กำลังทำ</div></div></div>`;
+  if(done.length)html+=`<div class="toolbar"><button onclick="clearHistory()">🗑 ล้างประวัติทั้งหมด</button></div>`;
+  if(!done.length)return html+`<div class="empty"><div class="big">🧾</div>ยังไม่มีประวัติ<br>ออร์เดอร์ที่ส่งสำเร็จหรือปิดแล้วจะมาอยู่ที่นี่</div>`;
+  done.forEach(o=>{
+    const dur=o.doneAt?Math.round((o.doneAt-o.ts)/60000):null;
+    const t=new Date(o.doneAt||o.ts).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+    const dd=new Date(o.doneAt||o.ts).toLocaleDateString('th-TH',{day:'numeric',month:'short'});
+    const deliver=!!o.dormId;
+    html+=`<div class="card ok" style="opacity:.9"><div class="accent"></div>
+      <div class="row"><div>
+        <div class="title">${esc(o.name)}</div>
+        <div class="sub">${o.items?esc(o.items):'—'}${o.ch?' · '+esc(o.ch):''}</div>
+        ${deliver?`<span class="dorm">🏢 ${esc(dormName(o.dormId))}</span>`:'<span class="badge gray">รับหน้าร้าน</span>'}
+        <span class="badge ok">${deliver?'ส่งสำเร็จ':'ปิดออร์เดอร์'}</span></div>
+        <div class="timer"><div class="big" style="font-size:16px">${dd}</div><div class="lbl">${t} น.</div>
+        ${dur!=null?`<div class="sm">รวม ${dur} นาที</div>`:''}</div></div></div>`;});
+  return html;
+}
+function clearHistory(){if(!confirm('ล้างประวัติออร์เดอร์ที่ส่ง/ปิดแล้วทั้งหมด?'))return;
+  orders=orders.filter(o=>o.status!=='done');persist();render();toast('ล้างประวัติแล้ว');}
 
 /* ===== DORMS ===== */
 function renderDorms(){
@@ -387,13 +418,16 @@ function maybeRoute(force){const pts=pendingWithCoords().map(s=>s.lat.toFixed(5)
       const sm=document.getElementById('riderSummary');if(sm){sm.dataset.route=`~${km} กม. · ${min} นาที`;renderStopSummary();}}
   }).catch(()=>{});}
 function renderStopSummary(){const sm=document.getElementById('riderSummary');if(!sm)return;
-  const pending=stops.filter(s=>!s.done).length,noPin=stops.filter(s=>!s.done&&s.lat==null).length;
+  const pending=stops.filter(s=>!s.done).length,noPin=stops.filter(s=>!s.done&&s.lat==null).length,pinned=pendingWithCoords().length;
   sm.innerHTML=`<div class="summary">
      <div class="chip"><div class="n">${stops.length}</div><div class="l">จุดส่ง</div></div>
      <div class="chip"><div class="n">${pending}</div><div class="l">ยังไม่ส่ง</div></div>
      <div class="chip ${noPin?'warn':''}"><div class="n">${noPin}</div><div class="l">ยังไม่ปักหมุด</div></div></div>
      ${sm.dataset.route?`<div style="text-align:center;font-size:13px;opacity:.85;margin:-6px 0 12px">🛣️ เส้นทางรวม ${sm.dataset.route}</div>`:''}
-     ${pending>1?`<div class="toolbar"><button onclick="sortByWait()">⏱ เรียงตามเวลารอ (ด่วนก่อน)</button></div>`:''}`;}
+     <div class="toolbar">
+       ${pinned?`<button class="navbtn" onclick="navRoute()">🧭 เริ่มนำทางทั้งเส้นทาง</button>`:''}
+       ${pending>1?`<button onclick="sortByWait()">⏱ เรียงตามเวลารอ</button>`:''}
+     </div>`;}
 function renderStopList(){const wrap=document.getElementById('stopList');if(!wrap)return;renderStopSummary();
   if(!stops.length){wrap.innerHTML=`<div class="empty"><div class="big">🛵</div>ยังไม่มีจุดส่ง<br>ออร์เดอร์ที่กด "พร้อมส่ง" จะเข้ามาที่นี่ หรือกด + เพิ่มเอง</div>`;return;}
   let html='';
@@ -425,10 +459,17 @@ function sortByWait(){const pend=stops.filter(s=>!s.done),done=stops.filter(s=>s
   pend.sort((a,b)=>(a.orderTs||a.createdTs)-(b.orderTs||b.createdTs));stops=[...pend,...done];persist();renderStopList();drawMap();toast('เรียงตามเวลารอแล้ว ⏱');}
 function moveStop(i,dir){const j=i+dir;if(j<0||j>=stops.length)return;[stops[i],stops[j]]=[stops[j],stops[i]];persist();renderStopList();drawMap();}
 function startStop(id){const s=stops.find(x=>x.id===id);if(s){s.startedAt=Date.now();persist();renderStopList();}}
-function deliverStop(id){const s=stops.find(x=>x.id===id);if(s){s.done=true;s.doneAt=Date.now();persist();renderStopList();drawMap();}}
+function deliverStop(id){const s=stops.find(x=>x.id===id);if(s){s.done=true;s.doneAt=Date.now();
+  if(s.orderId){const o=orders.find(x=>x.id===s.orderId);if(o){o.status='done';o.done=true;o.doneAt=Date.now();}}
+  persist();renderStopList();drawMap();toast('ส่งสำเร็จ! บันทึกเข้าประวัติ ✓');}}
 function delStop(id){stops=stops.filter(x=>x.id!==id);persist();renderStopList();drawMap();}
 function navTo(id){const s=stops.find(x=>x.id===id);if(s&&s.lat!=null)navToLL(s.lat,s.lng);}
 function navToLL(lat,lng){window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`,'_blank');}
+function navRoute(){const pins=pendingWithCoords();if(!pins.length)return;
+  const dest=pins[pins.length-1];const way=pins.slice(0,-1).map(s=>s.lat+','+s.lng).join('|');
+  let url=`https://www.google.com/maps/dir/?api=1&destination=${dest.lat},${dest.lng}&travelmode=driving`;
+  if(way)url+='&waypoints='+encodeURIComponent(way);
+  window.open(url,'_blank');}
 
 /* ===== Modals ===== */
 document.getElementById('fab').onclick=()=>view==='orders'?openOrderModal():view==='dorms'?openDormModal():openStopModal();
@@ -537,10 +578,10 @@ function tick(){
   document.querySelectorAll('[data-onway]').forEach(el=>{el.textContent=mmss(elapsed(+el.dataset.onway));});
   updateBadges();checkAlerts();}
 let alerted={};
-function checkAlerts(){orders.filter(o=>!o.done).forEach(o=>{const lvl=alertLevel(elapsed(o.ts)/60);
+function checkAlerts(){orders.filter(o=>o.status==='cooking').forEach(o=>{const lvl=alertLevel(elapsed(o.ts)/60);
   const prev=alerted[o.id]||0;if(lvl>prev){alerted[o.id]=lvl;buzz(lvl>=4?[220,100,220,100,220]:lvl>=3?[180,90,180]:lvl>=2?[140,70,140]:[120]);}});}
 function buzz(p){if(navigator.vibrate)navigator.vibrate(p);}
-function updateBadges(){const oLate=orders.filter(o=>!o.done&&elapsed(o.ts)/60>=WARN_MIN).length;
+function updateBadges(){const oLate=orders.filter(o=>o.status==='cooking'&&elapsed(o.ts)/60>=WARN_MIN).length;
   const co=document.getElementById('cntOrders');co.textContent=oLate;co.parentNode.classList.toggle('hasnew',oLate>0);
   const rPend=stops.filter(s=>!s.done).length;const cr=document.getElementById('cntRider');cr.textContent=rPend;cr.parentNode.classList.toggle('hasnew',rPend>0);}
 
