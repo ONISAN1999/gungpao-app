@@ -32,6 +32,12 @@ jobs:
       - name: Add Android platform
         run: npx cap add android
 
+      - name: Add location permission to AndroidManifest
+        run: |
+          MF=android/app/src/main/AndroidManifest.xml
+          sed -i 's#<application#<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>\n    <application#' "$MF"
+          echo "--- manifest ---"; grep -n "uses-permission\|<application" "$MF"
+
       - name: Copy web assets into Android project
         run: npx cap copy android
 
