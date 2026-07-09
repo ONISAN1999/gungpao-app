@@ -394,13 +394,15 @@ function subscribeAll(){
 }
 function applyRemote(coll,arr){
   if(coll==='orders'){orders=arr;migrateOrders();}
-  else if(coll==='stops'){stops=arr;stops.forEach(s=>{if(!s.createdTs)s.createdTs=s.orderTs||Date.now();});}
+  else if(coll==='stops'){stops=arr;stops.forEach(s=>{if(!s.createdTs)s.createdTs=s.orderTs||Date.now();});
+    stops.sort((a,b)=>((a.ord??1e9)-(b.ord??1e9))||((a.orderTs||a.createdTs||0)-(b.orderTs||b.createdTs||0)));} /* ซิงก์ลำดับส่งทุกเครื่อง */
   else if(coll==='dorms')dorms=arr;
   else if(coll==='menu'){if(arr.length)menu=arr;}
   saveLocal();render();
 }
 function saveLocal(){store.save('gp_orders',orders);store.save('gp_stops',stops);store.save('gp_dorms',dorms);store.save('gp_menu',menu);}
 function pushCloud(){if(!fb)return;const u={};
+  stops.forEach((s,i)=>s.ord=i); /* เก็บลำดับส่งไว้ซิงก์ */
   orders.forEach(o=>u['orders/'+o.id]=o);stops.forEach(s=>u['stops/'+s.id]=s);
   dorms.forEach(d=>u['dorms/'+d.id]=d);menu.forEach(m=>u['menu/'+m.id]=m);
   fb.ref('shop').update(u).catch(()=>{});}
@@ -635,8 +637,12 @@ function startWatch(){if(!('geolocation'in navigator)){setGps(false,'อุป�
     setGps(true,'กำลังติดตามไรเดอร์');updateRider();pushPresence(lastPos[0],lastPos[1]);if(follow&&map)map.setView(lastPos,map.getZoom(),{animate:true});maybeRoute();},
     err=>{setGps(false,err.code===1?'ไม่ได้อนุญาตตำแหน่ง':'หาตำแหน่งไม่ได้');},{enableHighAccuracy:true,maximumAge:5000,timeout:15000});}
 function setGps(on,txt){const d=document.getElementById('gpsDot'),t=document.getElementById('gpsTxt');if(d)d.classList.toggle('off',!on);if(t)t.textContent=txt;}
-function updateRider(){if(!map||!lastPos)return;const ic=L.divIcon({className:'',html:'<div class="rider-dot"></div>',iconSize:[22,22],iconAnchor:[11,11]});
-  if(!riderMarker)riderMarker=L.marker(lastPos,{icon:ic,zIndexOffset:1000}).addTo(map);else riderMarker.setLatLng(lastPos);}
+function updateRider(){if(!map||!lastPos)return;
+  const ic=L.divIcon({className:'',html:`<div style="display:flex;flex-direction:column;align-items:center;gap:3px;width:120px">
+    <span class="userpin"><span class="ue">${userEmoji(currentUser)}</span><span class="un">${esc(currentUser||'ฉัน')}</span></span>
+    <div class="rider-dot"></div></div>`,iconSize:[120,52],iconAnchor:[60,41]});
+  if(!riderMarker)riderMarker=L.marker(lastPos,{icon:ic,zIndexOffset:1000}).addTo(map);
+  else{riderMarker.setLatLng(lastPos);riderMarker.setIcon(ic);}}
 function toggleFollow(){follow=!follow;document.getElementById('followBtn').classList.toggle('on',follow);if(follow&&lastPos&&map)map.setView(lastPos,15,{animate:true});}
 function pendingWithCoords(){return stops.filter(s=>!s.done&&s.lat!=null);}
 function buildingSVG(){return '<svg width="48" height="60" viewBox="0 0 48 60" xmlns="http://www.w3.org/2000/svg">'
@@ -650,8 +656,8 @@ function buildingSVG(){return '<svg width="48" height="60" viewBox="0 0 48 60" x
   +'<rect x="20.5" y="39" width="7" height="7" fill="#b06a3c" stroke="#1a1a1a" stroke-width="1.5"/></svg>';}
 function stopIcon(s,n){
   const nm=esc(s.name||'');
-  if(s.dormId){return L.divIcon({className:'',html:`<div class="pinwrap"><span class="pname">${nm}</span><div class="bmark">${buildingSVG()}<span class="bnum">${n}</span></div></div>`,iconSize:[100,84],iconAnchor:[50,83],popupAnchor:[0,-76]});}
-  return L.divIcon({className:'',html:`<div class="pinwrap"><span class="pname">${nm}</span><div class="pin"><span>${n}</span></div></div>`,iconSize:[100,56],iconAnchor:[50,54],popupAnchor:[0,-50]});
+  /* หมุดปลายทางเป็นตึกทุกจุด */
+  return L.divIcon({className:'',html:`<div class="pinwrap"><span class="pname">${nm}</span><div class="bmark">${buildingSVG()}<span class="bnum">${n}</span></div></div>`,iconSize:[100,84],iconAnchor:[50,83],popupAnchor:[0,-76]});
 }
 function drawMap(){if(!map)return;stopLayer.clearLayers();const pend=stops.filter(s=>!s.done);let n=0;const pts=[];
   pend.forEach(s=>{n++;if(s.lat==null)return;
@@ -706,8 +712,9 @@ function renderStopList(){const wrap=document.getElementById('stopList');if(!wra
         <button class="btn sq" onclick="editStopLoc('${s.id}')">📍</button>
         ${hasPin?`<button class="btn sq nav" onclick="navTo('${s.id}')">🧭</button>`:''}
         ${done?`<button class="btn del main" onclick="delStop('${s.id}')">🗑 ลบออก</button>`
-          :onway?`<button class="btn done main" onclick="deliverStop('${s.id}')">✓ ส่งสำเร็จ</button>`
-          :`<button class="btn go main" onclick="startStop('${s.id}')">🛵 ออกส่ง</button>`}
+          :onway?`<button class="btn done main" onclick="deliverStop('${s.id}')">✓ ส่งจบงาน</button>`
+          :`<button class="btn go" style="flex:1 1 40%" onclick="startStop('${s.id}')">🛵 ออกส่ง</button>
+           <button class="btn done" style="flex:1 1 40%" onclick="deliverStop('${s.id}')">✓ ส่งจบงาน</button>`}
       </div></div>`;});
   wrap.innerHTML=html;}
 function sortByWait(){const pend=stops.filter(s=>!s.done),done=stops.filter(s=>s.done);
