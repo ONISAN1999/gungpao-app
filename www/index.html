@@ -10,6 +10,8 @@
 <title>ร้านกุ้งเผา – จัดการออร์เดอร์</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
   :root{
     --glass: rgba(255,255,255,0.14);
@@ -105,6 +107,12 @@
   .toolbar button:active{transform:scale(.97)}
   .toolbar button.navbtn{background:linear-gradient(135deg,#22c1c3,#3a86ff);border-color:transparent;color:#fff}
   .section-h{font-size:13px;font-weight:800;opacity:.9;margin:6px 4px 10px;letter-spacing:.3px}
+  .sales-row{display:flex;gap:10px;margin:4px 2px 12px}
+  .sbox{flex:1;background:linear-gradient(135deg,rgba(47,191,113,.28),rgba(34,193,195,.18));border:1px solid rgba(47,191,113,.5);
+    border-radius:18px;padding:14px;box-shadow:var(--shadow)}
+  .sbox.alt{background:linear-gradient(135deg,rgba(255,157,108,.25),rgba(255,122,154,.18));border-color:rgba(255,157,108,.5)}
+  .sbox .sv{font-size:23px;font-weight:800;line-height:1}
+  .sbox .sl{font-size:11px;opacity:.9;margin-top:5px}
   /* cart in order modal */
   .cart{background:rgba(255,255,255,.06);border:1px solid var(--stroke);border-radius:14px;padding:8px;margin-top:6px}
   .cart .line{display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.08)}
@@ -165,6 +173,11 @@
     font-size:12px;font-weight:800;box-shadow:0 2px 5px rgba(0,0,0,.35)}
   .rider-dot{width:22px;height:22px;border-radius:50%;background:#3a86ff;border:3px solid #fff;
     box-shadow:0 0 0 6px rgba(58,134,255,.25),0 2px 6px rgba(0,0,0,.4)}
+  .userpin{display:flex;align-items:center;gap:4px;background:rgba(20,22,40,.85);border:2px solid #2fbf71;border-radius:999px;
+    padding:2px 8px 2px 3px;box-shadow:0 2px 6px rgba(0,0,0,.4);white-space:nowrap}
+  .userpin.stale{border-color:#8891a5;opacity:.7}
+  .userpin .ue{font-size:15px}
+  .userpin .un{font-size:11px;font-weight:800;color:#fff}
   .leaflet-container{background:#1a1d2e;font-family:inherit}
   .leaflet-control-attribution{font-size:9px;background:rgba(20,22,40,.6)!important;color:#aaa!important}
   .leaflet-control-attribution a{color:#9ab!important}
@@ -214,7 +227,11 @@
   #picker{position:fixed;inset:0;z-index:200;display:none;flex-direction:column;background:#0f1220}
   #picker.show{display:flex}
   #pickerMap{flex:1}
-  .crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);z-index:600;pointer-events:none;font-size:40px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5))}
+  .crosshair{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);z-index:600;pointer-events:none}
+  .crosshair svg{filter:drop-shadow(0 5px 5px rgba(0,0,0,.45))}
+  .crosshair .dot{position:absolute;left:50%;bottom:-5px;width:10px;height:10px;border-radius:50%;background:rgba(0,0,0,.45);transform:translateX(-50%)}
+  .crosshair-hint{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:601;background:rgba(20,22,40,.82);backdrop-filter:blur(10px);
+    color:#fff;padding:7px 15px;border-radius:999px;font-size:12.5px;font-weight:700;pointer-events:none;white-space:nowrap;box-shadow:var(--shadow)}
   .picker-top{padding:calc(14px + env(safe-area-inset-top)) 16px 12px;text-align:center;font-weight:700;background:rgba(20,22,40,.7);backdrop-filter:blur(14px);z-index:601}
   .picker-bot{padding:14px 16px calc(18px + env(safe-area-inset-bottom));display:flex;gap:10px;background:rgba(20,22,40,.7);backdrop-filter:blur(14px);z-index:601}
   .picker-bot button{flex:1;border-radius:15px;padding:14px;font-size:15px;font-weight:800;border:1px solid var(--stroke);color:#fff;background:var(--glass-strong)}
@@ -236,10 +253,19 @@
     color:#fff;border-radius:16px;padding:15px 18px;font-size:16px;font-weight:700;text-align:left}
   .login-opt:active{transform:scale(.97);background:#fff;color:var(--ink)}
   .login-opt .ic{font-size:24px}
+  .synctag{position:absolute;top:calc(12px + env(safe-area-inset-top));left:14px;font-size:11px;font-weight:700;opacity:.85}
   .userchip{position:absolute;top:calc(10px + env(safe-area-inset-top));right:14px;background:var(--glass-strong);
     border:1px solid var(--stroke);color:#fff;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;
     backdrop-filter:blur(12px);display:flex;align-items:center;gap:5px}
   .userchip:active{transform:scale(.95)}
+  .exitpop{position:fixed;inset:0;z-index:400;background:rgba(10,12,24,.6);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:28px}
+  .exitpop.show{display:flex;animation:fade .2s}
+  .exitbox{width:100%;max-width:320px;text-align:center;background:rgba(30,33,52,.96);backdrop-filter:blur(26px);border:1px solid var(--stroke);border-radius:24px;padding:26px 20px 20px;box-shadow:var(--shadow)}
+  .exitlogo{font-size:40px}
+  .exittitle{font-size:17px;font-weight:800;margin:8px 0 18px}
+  .exitbtns{display:flex;gap:10px}
+  .exitbtns button{flex:1;border-radius:14px;padding:13px;font-size:15px;font-weight:800;border:1px solid var(--stroke);background:var(--glass-strong);color:#fff}
+  .exitbtns button.danger{background:linear-gradient(135deg,#f43f5e,#e11d48);border-color:transparent}
   .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:180px;background:rgba(30,33,52,.95);border:1px solid var(--stroke);
     color:#fff;padding:12px 20px;border-radius:16px;font-weight:700;font-size:14px;z-index:300;box-shadow:var(--shadow);opacity:0;transition:opacity .3s,transform .3s;pointer-events:none}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-8px)}
@@ -262,6 +288,7 @@
     <div class="brand">🦐 ร้านกุ้งเผา</div>
     <h1 id="viewTitle">คิวออร์เดอร์</h1>
     <div class="clock" id="clock"></div>
+    <div class="synctag" id="syncDot">📴 ออฟไลน์</div>
     <button class="userchip" id="userChip" onclick="logout()"></button>
   </header>
   <main id="main"></main>
@@ -281,6 +308,14 @@
 <div class="modal-bg" id="modalBg"><div class="modal" id="modalBox"></div></div>
 <div class="toast" id="toast"></div>
 
+<div id="exitPop" class="exitpop">
+  <div class="exitbox">
+    <div class="exitlogo">🦐</div>
+    <div class="exittitle">ออกจากแอปร้านกุ้งเผา?</div>
+    <div class="exitbtns"><button onclick="hideExit()">ยกเลิก</button><button class="danger" onclick="doExit()">ออกจากแอป</button></div>
+  </div>
+</div>
+
 <div id="menuPick">
   <div class="mp-top"><span>📖 เลือกเมนู</span></div>
   <div class="mp-cats" id="mpCats"></div>
@@ -292,7 +327,11 @@
   <div class="picker-top" id="pickerTitle">ปักตำแหน่งจุดส่ง</div>
   <div style="position:relative;flex:1;display:flex">
     <div id="pickerMap"></div>
-    <div class="crosshair">📍</div>
+    <div class="crosshair-hint">เลื่อนแผนที่ให้หมุดตรงจุดส่ง</div>
+    <div class="crosshair">
+      <svg width="42" height="54" viewBox="0 0 42 54" xmlns="http://www.w3.org/2000/svg"><path d="M21 52 C21 52 38 31 38 19 A17 17 0 1 0 4 19 C4 31 21 52 21 52 Z" fill="#f43f5e" stroke="#fff" stroke-width="3"/><circle cx="21" cy="19" r="6.5" fill="#fff"/></svg>
+      <div class="dot"></div>
+    </div>
     <button class="picker-locate" onclick="pickerLocate()">🎯</button>
   </div>
   <div class="picker-bot">
@@ -317,7 +356,53 @@ const USERS=[{n:'POS',i:'🖥️'},{n:'บังฟาน',i:'🧔'},{n:'น้�
 let view='orders';
 stops.forEach(s=>{if(!s.createdTs)s.createdTs=s.orderTs||Date.now();}); // backfill
 orders.forEach(o=>{if(!o.status)o.status=o.done?'done':'cooking';if(!o.cart)o.cart=[];}); // migration
-function persist(){store.save('gp_orders',orders);store.save('gp_stops',stops);store.save('gp_dorms',dorms);store.save('gp_menu',menu);}
+
+/* ===== Cloud sync (Firebase Realtime DB) ===== */
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyCNbyPn3B8rSwhbd6Z3qYZ2tSC83p8tvnY",
+  authDomain:"gungpao-bangfan.firebaseapp.com",
+  databaseURL:"https://gungpao-bangfan-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"gungpao-bangfan",
+  storageBucket:"gungpao-bangfan.firebasestorage.app",
+  messagingSenderId:"256836416195",
+  appId:"1:256836416195:web:d64806271156a983336876"
+};
+let fb=null, presence={}, _last={};
+function migrateOrders(){orders.forEach(o=>{if(!o.status)o.status='cooking';if(!o.cart)o.cart=[];});}
+function initFirebase(){
+  if(!window.firebase||!FIREBASE_CONFIG||!FIREBASE_CONFIG.databaseURL)return;
+  try{firebase.initializeApp(FIREBASE_CONFIG);fb=firebase.database();subscribeAll();setSync(true);}
+  catch(e){console.log('fb',e);setSync(false);}
+}
+function subscribeAll(){
+  ['orders','stops','dorms','menu'].forEach(coll=>{
+    fb.ref('shop/'+coll).on('value',snap=>{
+      const arr=Object.values(snap.val()||{});const inc=JSON.stringify(arr);
+      if(_last[coll]===inc)return;_last[coll]=inc;applyRemote(coll,arr);
+    });
+  });
+  fb.ref('shop/presence').on('value',snap=>{presence=snap.val()||{};if(view==='rider')drawPresence();});
+}
+function applyRemote(coll,arr){
+  if(coll==='orders'){orders=arr;migrateOrders();}
+  else if(coll==='stops'){stops=arr;stops.forEach(s=>{if(!s.createdTs)s.createdTs=s.orderTs||Date.now();});}
+  else if(coll==='dorms')dorms=arr;
+  else if(coll==='menu'){if(arr.length)menu=arr;}
+  saveLocal();render();
+}
+function saveLocal(){store.save('gp_orders',orders);store.save('gp_stops',stops);store.save('gp_dorms',dorms);store.save('gp_menu',menu);}
+function pushCloud(){if(!fb)return;const u={};
+  orders.forEach(o=>u['orders/'+o.id]=o);stops.forEach(s=>u['stops/'+s.id]=s);
+  dorms.forEach(d=>u['dorms/'+d.id]=d);menu.forEach(m=>u['menu/'+m.id]=m);
+  fb.ref('shop').update(u).catch(()=>{});}
+function persist(){saveLocal();pushCloud();}
+function cloudRemove(coll,id){if(fb)fb.ref('shop/'+coll+'/'+id).remove().catch(()=>{});}
+function setSync(on){const el=document.getElementById('syncDot');if(el){el.textContent=on?'☁️ ซิงก์':'📴 ออฟไลน์';}}
+/* presence: broadcast this user's GPS to everyone */
+function pushPresence(lat,lng){if(!fb||!currentUser)return;
+  const ref=fb.ref('shop/presence/'+presenceKey(currentUser));
+  ref.set({name:currentUser,lat,lng,at:Date.now()});ref.onDisconnect().remove();}
+function presenceKey(n){return String(n).replace(/[.#$\[\]\/]/g,'_');}
 function cartTotal(cart){return (cart||[]).reduce((s,l)=>s+l.price*l.qty,0);}
 function cartSummary(cart){return (cart||[]).map(l=>l.name+(l.qty>1?' x'+l.qty:'')).join(', ');}
 function baht(n){return '฿'+Number(n||0).toLocaleString('th-TH');}
@@ -416,12 +501,19 @@ function completeOrder(id){const o=orders.find(x=>x.id===id);if(!o)return;
     lat:d?d.lat:null,lng:d?d.lng:null,orderTs:o.ts,createdTs:Date.now(),done:false,startedAt:null}); // orderTs=o.ts → เวลานับต่อเนื่อง
   o.status='delivering';o.done=false;firstFit=true;
   persist();buzz([60]);render();toast('พร้อมส่ง → เข้าคิวไรเดอร์ 🛵');}
-function delOrder(id){orders=orders.filter(x=>x.id!==id);persist();render();}
+function delOrder(id){orders=orders.filter(x=>x.id!==id);cloudRemove('orders',id);persist();render();}
 
 /* ===== HISTORY ===== */
 function renderHistory(){
   const done=orders.filter(o=>o.status==='done').sort((a,b)=>(b.doneAt||0)-(a.doneAt||0));
-  let html=`<div class="summary">
+  const t0=new Date();t0.setHours(0,0,0,0);const ts0=t0.getTime();
+  const salesAll=done.reduce((s,o)=>s+orderTotal(o),0);
+  const doneToday=done.filter(o=>(o.doneAt||0)>=ts0);
+  const salesToday=doneToday.reduce((s,o)=>s+orderTotal(o),0);
+  let html=`<div class="sales">
+     <div class="sales-row"><div class="sbox"><div class="sv">${baht(salesToday)}</div><div class="sl">💰 ยอดขายวันนี้ · ${doneToday.length} ออร์เดอร์</div></div>
+       <div class="sbox alt"><div class="sv">${baht(salesAll)}</div><div class="sl">รวมทั้งหมด · ${done.length} ออร์เดอร์</div></div></div></div>
+     <div class="summary">
      <div class="chip"><div class="n">${done.length}</div><div class="l">ส่ง/ปิดแล้ว</div></div>
      <div class="chip"><div class="n">${orders.filter(o=>o.status==='delivering').length}</div><div class="l">กำลังส่ง</div></div>
      <div class="chip"><div class="n">${orders.filter(o=>o.status==='cooking').length}</div><div class="l">กำลังทำ</div></div></div>`;
@@ -444,6 +536,7 @@ function renderHistory(){
   return html;
 }
 function clearHistory(){if(!confirm('ล้างประวัติออร์เดอร์ที่ส่ง/ปิดแล้วทั้งหมด?'))return;
+  orders.filter(o=>o.status==='done').forEach(o=>cloudRemove('orders',o.id));
   orders=orders.filter(o=>o.status!=='done');persist();render();toast('ล้างประวัติแล้ว');}
 
 /* ===== MENU MANAGEMENT ===== */
@@ -461,7 +554,7 @@ function renderMenu(){
           <button class="btn del" onclick="delMenuItem('${m.id}')">🗑</button></div></div></div>`;});});
   return html;
 }
-function delMenuItem(id){if(!confirm('ลบเมนูนี้?'))return;menu=menu.filter(m=>m.id!==id);persist();render();}
+function delMenuItem(id){if(!confirm('ลบเมนูนี้?'))return;menu=menu.filter(m=>m.id!==id);cloudRemove('menu',id);persist();render();}
 function openMenuItemModal(edit){const m=edit?menu.find(x=>x.id===edit):null;
   const cats=[...CAT_ORDER,...[...new Set(menu.map(x=>x.cat))].filter(c=>!CAT_ORDER.includes(c))];
   document.getElementById('modalBox').innerHTML=`
@@ -499,12 +592,12 @@ function renderDorms(){
         <button class="btn del" onclick="delDorm('${d.id}')">🗑</button></div></div>`;});
   return html;
 }
-function delDorm(id){if(!confirm('ลบหอพักนี้?'))return;dorms=dorms.filter(x=>x.id!==id);persist();render();}
+function delDorm(id){if(!confirm('ลบหอพักนี้?'))return;dorms=dorms.filter(x=>x.id!==id);cloudRemove('dorms',id);persist();render();}
 function pinDorm(id){const d=dorms.find(x=>x.id===id);if(!d)return;
   openPicker(d.lat!=null?[d.lat,d.lng]:(lastPos||BKK),(lat,lng)=>{d.lat=lat;d.lng=lng;persist();render();toast('ปักหมุดแล้ว 📍');});}
 
 /* ===== RIDER + MAP ===== */
-let map=null,riderMarker=null,stopLayer=null,routeLayer=null,straightLayer=null;
+let map=null,riderMarker=null,stopLayer=null,routeLayer=null,straightLayer=null,presenceLayer=null;
 let watchId=null,lastPos=null,follow=true,firstFit=true,lastRouteSig='',lastRouteTime=0;
 function renderRiderView(){const main=document.getElementById('main');
   if(!map){main.innerHTML=`
@@ -517,13 +610,20 @@ function renderRiderView(){const main=document.getElementById('main');
   renderStopList();drawMap();}
 function initMap(){map=L.map('map',{zoomControl:false}).setView(lastPos||BKK,14);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
-  stopLayer=L.layerGroup().addTo(map);routeLayer=L.layerGroup().addTo(map);straightLayer=L.layerGroup().addTo(map);
+  stopLayer=L.layerGroup().addTo(map);routeLayer=L.layerGroup().addTo(map);straightLayer=L.layerGroup().addTo(map);presenceLayer=L.layerGroup().addTo(map);
   map.on('dragstart',()=>{follow=false;const f=document.getElementById('followBtn');f&&f.classList.remove('on');});
-  setTimeout(()=>map.invalidateSize(),200);startWatch();}
-function teardownMap(){if(map){map.remove();map=null;riderMarker=stopLayer=routeLayer=straightLayer=null;firstFit=true;}}
+  setTimeout(()=>map.invalidateSize(),200);startWatch();drawPresence();}
+function teardownMap(){if(map){map.remove();map=null;riderMarker=stopLayer=routeLayer=straightLayer=presenceLayer=null;firstFit=true;}}
+function userEmoji(name){const u=USERS.find(x=>x.n===name);return u?u.i:'👤';}
+function agoText(ts){if(!ts)return'';const s=Math.floor((Date.now()-ts)/1000);if(s<60)return s+' วิที่แล้ว';const m=Math.floor(s/60);if(m<60)return m+' นาทีที่แล้ว';return Math.floor(m/60)+' ชม.ที่แล้ว';}
+function drawPresence(){if(!map||!presenceLayer)return;presenceLayer.clearLayers();
+  Object.values(presence||{}).forEach(u=>{if(u.lat==null||u.name===currentUser)return;
+    const fresh=Date.now()-(u.at||0)<5*60000;
+    const ic=L.divIcon({className:'',html:`<div class="userpin ${fresh?'':'stale'}"><span class="ue">${userEmoji(u.name)}</span><span class="un">${esc(u.name)}</span></div>`,iconSize:[90,30],iconAnchor:[45,15]});
+    L.marker([u.lat,u.lng],{icon:ic,zIndexOffset:500}).addTo(presenceLayer).bindPopup('<b>'+esc(u.name)+'</b><br>อัปเดต '+agoText(u.at));});}
 function startWatch(){if(!('geolocation'in navigator)){setGps(false,'อุปกรณ์ไม่รองรับ GPS');return;}if(watchId!==null)return;
   watchId=navigator.geolocation.watchPosition(pos=>{lastPos=[pos.coords.latitude,pos.coords.longitude];
-    setGps(true,'กำลังติดตามไรเดอร์');updateRider();if(follow&&map)map.setView(lastPos,map.getZoom(),{animate:true});maybeRoute();},
+    setGps(true,'กำลังติดตามไรเดอร์');updateRider();pushPresence(lastPos[0],lastPos[1]);if(follow&&map)map.setView(lastPos,map.getZoom(),{animate:true});maybeRoute();},
     err=>{setGps(false,err.code===1?'ไม่ได้อนุญาตตำแหน่ง':'หาตำแหน่งไม่ได้');},{enableHighAccuracy:true,maximumAge:5000,timeout:15000});}
 function setGps(on,txt){const d=document.getElementById('gpsDot'),t=document.getElementById('gpsTxt');if(d)d.classList.toggle('off',!on);if(t)t.textContent=txt;}
 function updateRider(){if(!map||!lastPos)return;const ic=L.divIcon({className:'',html:'<div class="rider-dot"></div>',iconSize:[22,22],iconAnchor:[11,11]});
@@ -548,7 +648,7 @@ function drawMap(){if(!map)return;stopLayer.clearLayers();const pend=stops.filte
     L.marker([s.lat,s.lng],{icon:stopIcon(s,n)}).addTo(stopLayer).bindPopup(`<b>${esc(s.name)}</b><br>${esc(s.addr||'')}`);pts.push([s.lat,s.lng]);});
   if(firstFit&&(pts.length||lastPos)){const all=[...pts];if(lastPos)all.push(lastPos);
     if(all.length===1)map.setView(all[0],15);else if(all.length)map.fitBounds(all,{padding:[50,50]});firstFit=false;}
-  drawStraight();maybeRoute(true);}
+  drawStraight();drawPresence();maybeRoute(true);}
 function drawStraight(){straightLayer.clearLayers();const pts=pendingWithCoords().map(s=>[s.lat,s.lng]);
   const seq=lastPos?[lastPos,...pts]:pts;if(seq.length>1)L.polyline(seq,{color:'#fff',weight:2,opacity:.35,dashArray:'6,8'}).addTo(straightLayer);}
 function maybeRoute(force){const pts=pendingWithCoords().map(s=>s.lat.toFixed(5)+','+s.lng.toFixed(5));
@@ -608,7 +708,7 @@ function startStop(id){const s=stops.find(x=>x.id===id);if(s){s.startedAt=Date.n
 function deliverStop(id){const s=stops.find(x=>x.id===id);if(s){s.done=true;s.doneAt=Date.now();
   if(s.orderId){const o=orders.find(x=>x.id===s.orderId);if(o){o.status='done';o.done=true;o.doneAt=Date.now();}}
   persist();renderStopList();drawMap();toast('ส่งสำเร็จ! บันทึกเข้าประวัติ ✓');}}
-function delStop(id){stops=stops.filter(x=>x.id!==id);persist();renderStopList();drawMap();}
+function delStop(id){stops=stops.filter(x=>x.id!==id);cloudRemove('stops',id);persist();renderStopList();drawMap();}
 function navTo(id){const s=stops.find(x=>x.id===id);if(s&&s.lat!=null)navToLL(s.lat,s.lng);}
 function navToLL(lat,lng){window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`,'_blank');}
 function navRoute(){const pins=pendingWithCoords();if(!pins.length)return;
@@ -789,14 +889,39 @@ function updateBadges(){const oLate=orders.filter(o=>o.status==='cooking'&&elaps
 function renderLoginOpts(){document.getElementById('loginOpts').innerHTML=USERS.map(u=>
   `<button class="login-opt" onclick="doLogin('${u.n}')"><span class="ic">${u.i}</span><span>${u.n}</span></button>`).join('');}
 function showLogin(){renderLoginOpts();document.getElementById('login').classList.add('show');}
-function doLogin(name){currentUser=name;store.save('gp_user',name);document.getElementById('login').classList.remove('show');updateUserChip();toast('เข้าระบบเป็น '+name);}
+function doLogin(name){currentUser=name;store.save('gp_user',name);document.getElementById('login').classList.remove('show');updateUserChip();startWatch();toast('เข้าระบบเป็น '+name);}
 function logout(){showLogin();}
 function updateUserChip(){const c=document.getElementById('userChip');const u=USERS.find(x=>x.n===currentUser);
   c.textContent=(u?u.i:'👤')+' '+(currentUser||'เลือกผู้ใช้');}
 
+/* ===== back button ===== */
+function closeTopUI(){
+  const ex=document.getElementById('exitPop');if(ex&&ex.classList.contains('show')){hideExit();return true;}
+  const mp=document.getElementById('menuPick');if(mp&&mp.classList.contains('show')){closeMenuPick();return true;}
+  const pk=document.getElementById('picker');if(pk&&pk.classList.contains('show')){closePicker();return true;}
+  const mb=document.getElementById('modalBg');if(mb&&mb.classList.contains('show')){closeModal();return true;}
+  return false;
+}
+function handleBack(){
+  const lg=document.getElementById('login');if(lg&&lg.classList.contains('show'))return;
+  if(closeTopUI())return;
+  if(view!=='orders'){switchView('orders');return;}
+  showExit();
+}
+function showExit(){document.getElementById('exitPop').classList.add('show');}
+function hideExit(){document.getElementById('exitPop').classList.remove('show');}
+function doExit(){if(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App){Capacitor.Plugins.App.exitApp();}else{hideExit();history.back();}}
+function initBack(){
+  if(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App){
+    Capacitor.Plugins.App.addListener('backButton',()=>handleBack());
+  }else{
+    try{history.pushState({a:1},'');window.addEventListener('popstate',()=>{handleBack();history.pushState({a:1},'');});}catch(e){}
+  }
+}
+
 /* ===== boot ===== */
 fmtClock();setInterval(fmtClock,10000);setInterval(tick,1000);
-updateUserChip();showLogin();
+updateUserChip();showLogin();initFirebase();initBack();
 window.addEventListener('resize',movePill);movePill();render();
 
 /* ===== PWA ===== */
