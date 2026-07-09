@@ -104,9 +104,10 @@
   .btn:active{transform:scale(.96)}
   .btn.done{background:linear-gradient(135deg,#2fbf71,#1f9a58);border-color:transparent}
   .btn.del{flex:0 0 46px;background:rgba(244,63,94,.22);border-color:rgba(244,63,94,.4)}
+  .btn.del.main{flex:1 1 100%;height:44px;font-size:14px;white-space:nowrap}
   .btn.go{background:linear-gradient(135deg,#6f9bff,#4f7de0);border-color:transparent}
   .btn.mapnav{background:linear-gradient(135deg,#22c1c3,#3a86ff);border-color:transparent}
-  .btn.pin{flex:0 0 46px;font-size:17px}
+  .btn.pinbtn{flex:0 0 46px;font-size:17px}
   .btn.edit{flex:0 0 46px;font-size:17px}
   .btn.mini{flex:0 0 44px;font-size:17px;padding:9px}
   .rider-num{position:absolute;top:12px;right:14px;width:30px;height:30px;border-radius:50%;
@@ -621,7 +622,7 @@ function renderDorms(){
         ${!hasPin?'<span class="badge gray">⚠️ ยังไม่ปักหมุด</span>':'<span class="badge ok">📍 ปักหมุดแล้ว</span>'}</div></div>
       <div class="actions">
         <button class="btn go" onclick="editDorm('${d.id}')">✎ แก้ไข</button>
-        <button class="btn pin" onclick="pinDorm('${d.id}')">📍</button>
+        <button class="btn pinbtn" onclick="pinDorm('${d.id}')">📍</button>
         ${hasPin?`<button class="btn mapnav" onclick="navToLL(${d.lat},${d.lng})">🧭</button>`:''}
         <button class="btn del" onclick="delDorm('${d.id}')">🗑</button></div></div>`;});
   return html;
@@ -899,11 +900,30 @@ function openDormModal(edit){const d=edit?dorms.find(x=>x.id===edit):null;staged
     <div class="field"><label>ชื่อหอพัก / จุดส่ง</label><input id="dName" placeholder="เช่น หอพักสุขใจ / คอนโดริมน้ำ" autocomplete="off" value="${d?esc(d.name):''}"></div>
     <div class="field"><label>ที่อยู่ / จุดสังเกต</label><textarea id="dAddr" placeholder="เช่น ซอย 5 ตรงข้าม 7-11">${d?esc(d.addr||''):''}</textarea></div>
     <div class="field"><button class="locbtn ${stagedLoc?'set':''}" id="locBtn" onclick="pickForDorm()">${stagedLoc?'✓ ปักหมุดแล้ว (แตะเพื่อแก้)':'📍 ปักตำแหน่งหอพัก'}</button></div>
+    <div class="field"><label>หรือวางลิงก์ Google Maps</label>
+      <div style="display:flex;gap:8px"><input id="dGmap" placeholder="วางลิงก์ เช่น https://maps.google.com/..." autocomplete="off" style="flex:1;min-width:0">
+      <button class="btn go" style="flex:0 0 auto;padding:0 14px" onclick="importGmap()">📥 ดึงพิกัด</button></div>
+      <div style="font-size:11px;opacity:.65;margin-top:5px;line-height:1.5">ลิงก์สั้น (maps.app.goo.gl) ให้เปิดลิงก์ในเบราว์เซอร์ก่อน แล้วคัดลอกลิงก์ยาวจากช่องที่อยู่มาวาง</div></div>
     <button class="save" onclick="saveDorm('${edit||''}')">${d?'บันทึก':'เพิ่มหอพัก +'}</button>
     <button class="cancel" onclick="closeModal()">ยกเลิก</button>`;
   document.getElementById('modalBg').classList.add('show');if(!d)setTimeout(()=>document.getElementById('dName').focus(),300);}
 function editDorm(id){openDormModal(id);}
 function pickForDorm(){openPicker(stagedLoc||lastPos,(lat,lng)=>{stagedLoc=[lat,lng];const b=document.getElementById('locBtn');b.classList.add('set');b.textContent='✓ ปักหมุดแล้ว (แตะเพื่อแก้)';});}
+/* ===== ดึงพิกัดจากลิงก์ Google Maps ===== */
+function parseGmapLL(t){t=String(t||'');try{t=decodeURIComponent(t);}catch(e){}
+  let m;
+  if(m=t.match(/@(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)/))return[+m[1],+m[2]];
+  if(m=t.match(/!3d(-?\d{1,2}\.\d+)!4d(-?\d{1,3}\.\d+)/))return[+m[1],+m[2]];
+  if(m=t.match(/[?&](?:q|query|ll|daddr|destination)=(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/))return[+m[1],+m[2]];
+  if(m=t.match(/(-?\d{1,2}\.\d{4,})\s*,\s*(-?\d{1,3}\.\d{4,})/))return[+m[1],+m[2]];
+  return null;}
+function importGmap(){const el=document.getElementById('dGmap');const v=el?el.value.trim():'';if(!v){toast('วางลิงก์ก่อนครับ');return;}
+  const ll=parseGmapLL(v);
+  if(ll&&ll[0]>=-90&&ll[0]<=90){stagedLoc=ll;
+    const b=document.getElementById('locBtn');if(b){b.classList.add('set');b.textContent='✓ ปักหมุดจากลิงก์แล้ว ('+ll[0].toFixed(5)+', '+ll[1].toFixed(5)+')';}
+    toast('ดึงพิกัดสำเร็จ 📍');}
+  else if(/goo\.gl|maps\.app/.test(v)){toast('ลิงก์สั้นไม่มีพิกัด — เปิดลิงก์ก่อนแล้วคัดลอกลิงก์ยาวมาวาง');}
+  else toast('อ่านพิกัดไม่ได้ ลองคัดลอกลิงก์ใหม่');}
 function saveDorm(edit){const name=document.getElementById('dName').value.trim();if(!name){document.getElementById('dName').focus();return;}
   const data={name,addr:document.getElementById('dAddr').value.trim(),lat:stagedLoc?stagedLoc[0]:null,lng:stagedLoc?stagedLoc[1]:null};
   if(edit){Object.assign(dorms.find(x=>x.id===edit),data);}else dorms.push(Object.assign({id:uid()},data));
