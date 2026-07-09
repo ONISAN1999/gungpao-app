@@ -303,7 +303,7 @@
 
 <div class="app">
   <header class="top">
-    <div class="brand">🦐 ร้านกุ้งเผา · v16</div>
+    <div class="brand">🦐 ร้านกุ้งเผา · v17</div>
     <h1 id="viewTitle">คิวออร์เดอร์</h1>
     <div class="clock" id="clock"></div>
     <div class="synctag" id="syncDot">📴 ออฟไลน์</div>
@@ -785,9 +785,16 @@ document.getElementById('modalBg').onclick=e=>{if(e.target.id==='modalBg')closeM
 function pick(el,val,hid){document.getElementById(hid).value=val;el.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');}
 
 /* dorm chip picker (reusable) */
-function dormChipsHtml(hid){let h=`<button type="button" class="sel" onclick="pickDorm(this,'','${hid}')">รับหน้าร้าน</button>`;
-  dorms.forEach(d=>h+=`<button type="button" onclick="pickDorm(this,'${d.id}','${hid}')">🏢 ${esc(d.name)}</button>`);
-  h+=`<button type="button" class="add" onclick="quickAddDorm('${hid}')">+ หอพักใหม่</button>`;return h;}
+function dormChipsHtml(hid){let h='';
+  if(dorms.length>=5)h+=`<input type="search" placeholder="🔍 ค้นหาหอพัก..." oninput="filterDorms(this)" autocomplete="off"
+    style="flex:1 1 100%;padding:10px 12px;border-radius:12px;border:1px solid var(--stroke);background:rgba(255,255,255,.08);color:#fff;font-size:14px">`;
+  h+=`<button type="button" class="sel" data-keep="1" onclick="pickDorm(this,'','${hid}')">รับหน้าร้าน</button>`;
+  dorms.forEach(d=>h+=`<button type="button" data-name="${esc(d.name)}" onclick="pickDorm(this,'${d.id}','${hid}')">🏢 ${esc(d.name)}</button>`);
+  h+=`<button type="button" class="add" data-keep="1" onclick="quickAddDorm('${hid}')">+ หอพักใหม่</button>`;return h;}
+function filterDorms(inp){const q=inp.value.trim().toLowerCase();
+  inp.parentNode.querySelectorAll('button').forEach(b=>{
+    if(b.dataset.keep==='1'){b.style.display='';return;}
+    b.style.display=(!q||(b.dataset.name||'').toLowerCase().includes(q))?'':'none';});}
 function pickDorm(el,id,hid){document.getElementById(hid).value=id;el.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');
   if(hid==='sDormVal'){const d=dorms.find(x=>x.id===id);const addr=document.getElementById('sAddr');
     if(d){if(addr&&!addr.value)addr.value=d.addr||'';if(d.lat!=null){stagedLoc=[d.lat,d.lng];const b=document.getElementById('locBtn');if(b){b.classList.add('set');b.textContent='✓ ใช้พิกัดหอพัก (แตะเพื่อแก้)';}}}}}
@@ -1002,15 +1009,20 @@ function cfOk(){const cb=_cfCb;cfClose();cb&&cb();}
 
 function showExit(){document.getElementById('exitPop').classList.add('show');}
 function hideExit(){document.getElementById('exitPop').classList.remove('show');}
-function doExit(){if(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App){Capacitor.Plugins.App.exitApp();}else{hideExit();history.back();}}
-let _backTries=0;
+function getAppPlugin(){try{
+  if(!window.Capacitor)return null;
+  if(Capacitor.Plugins&&Capacitor.Plugins.App&&Capacitor.Plugins.App.addListener)return Capacitor.Plugins.App;
+  if(Capacitor.registerPlugin){if(!window._appPlug)window._appPlug=Capacitor.registerPlugin('App');return window._appPlug;}
+}catch(e){}return null;}
+function doExit(){const A=getAppPlugin();if(A&&A.exitApp){A.exitApp();}else{hideExit();history.back();}}
+let _backTries=0,_backMode='';
 function initBack(){
-  const App=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;
-  if(App&&App.addListener){
-    try{App.addListener('backButton',()=>handleBack());return;}catch(e){}
+  const A=getAppPlugin();
+  if(A&&A.addListener){
+    try{A.addListener('backButton',()=>handleBack());_backMode='native';return;}catch(e){}
   }
   if(window.Capacitor&&_backTries<10){_backTries++;setTimeout(initBack,300);return;} /* bridge ยังไม่พร้อม ลองใหม่ */
-  try{history.pushState({a:1},'');window.addEventListener('popstate',()=>{handleBack();history.pushState({a:1},'');});}catch(e){}
+  try{history.pushState({a:1},'');window.addEventListener('popstate',()=>{handleBack();history.pushState({a:1},'');});_backMode='history';}catch(e){}
 }
 
 /* ===== boot ===== */
