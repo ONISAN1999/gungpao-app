@@ -149,7 +149,7 @@
   .mp-bot .done{background:linear-gradient(135deg,#2fbf71,#1f9a58);border:none;color:#fff;font-size:15px;font-weight:800;padding:13px 22px;border-radius:14px}
 
   /* Map */
-  #mapWrap{position:relative;height:44vh;min-height:280px;border-radius:22px;overflow:hidden;
+  #mapWrap{position:relative;z-index:0;isolation:isolate;height:44vh;min-height:280px;border-radius:22px;overflow:hidden;
     border:1px solid var(--stroke);box-shadow:var(--shadow);margin-bottom:14px;background:#1a1d2e}
   #map{position:absolute;inset:0}
   .map-overlay{position:absolute;z-index:500}
@@ -911,12 +911,14 @@ function handleBack(){
 function showExit(){document.getElementById('exitPop').classList.add('show');}
 function hideExit(){document.getElementById('exitPop').classList.remove('show');}
 function doExit(){if(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App){Capacitor.Plugins.App.exitApp();}else{hideExit();history.back();}}
+let _backTries=0;
 function initBack(){
-  if(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App){
-    Capacitor.Plugins.App.addListener('backButton',()=>handleBack());
-  }else{
-    try{history.pushState({a:1},'');window.addEventListener('popstate',()=>{handleBack();history.pushState({a:1},'');});}catch(e){}
+  const App=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;
+  if(App&&App.addListener){
+    try{App.addListener('backButton',()=>handleBack());return;}catch(e){}
   }
+  if(window.Capacitor&&_backTries<10){_backTries++;setTimeout(initBack,300);return;} /* bridge ยังไม่พร้อม ลองใหม่ */
+  try{history.pushState({a:1},'');window.addEventListener('popstate',()=>{handleBack();history.pushState({a:1},'');});}catch(e){}
 }
 
 /* ===== boot ===== */
