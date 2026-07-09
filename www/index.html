@@ -10,6 +10,7 @@
 <title>ร้านกุ้งเผา – จัดการออร์เดอร์</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
@@ -36,10 +37,13 @@
   @keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-30px) scale(1.08)}}
 
   .app{height:100%;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
-  header.top{padding:16px 18px 6px;text-align:center}
-  header.top .brand{font-size:13px;letter-spacing:2px;opacity:.8;text-transform:uppercase}
-  header.top h1{font-size:22px;font-weight:800;margin-top:2px;text-shadow:0 2px 12px rgba(0,0,0,.3)}
-  .clock{font-size:12px;opacity:.75;margin-top:2px}
+  header.top{position:relative;margin:calc(10px + env(safe-area-inset-top)) 14px 8px;padding:13px 88px 11px;text-align:center;
+    background:rgba(20,22,40,.5);backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);
+    border:1px solid rgba(255,255,255,.16);border-radius:24px;box-shadow:0 12px 36px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.12)}
+  header.top .brand{font-size:11px;letter-spacing:3px;opacity:.75;text-transform:uppercase;font-weight:700}
+  header.top h1{font-size:19px;font-weight:800;margin-top:3px;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    background:linear-gradient(120deg,#fff 20%,#ffe1e8 60%,#ffb9ca);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .clock{font-size:11.5px;opacity:.7;margin-top:3px}
   main{flex:1;overflow-y:auto;padding:8px 14px 130px;-webkit-overflow-scrolling:touch}
 
   .summary{display:flex;gap:8px;margin:6px 2px 14px}
@@ -70,7 +74,8 @@
   .card .sub{font-size:12.5px;opacity:.85;margin-top:2px;line-height:1.4}
   .card .dorm{display:inline-block;font-size:12px;font-weight:700;background:rgba(111,155,255,.25);color:#d5e3ff;
     padding:2px 9px;border-radius:999px;margin-top:6px}
-  .timer{text-align:right;flex-shrink:0}
+  .timer{text-align:right;flex-shrink:0;margin-left:8px;max-width:46%}
+  .card .title{overflow-wrap:anywhere}
   .timer .big{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
   .timer .lbl{font-size:10px;opacity:.8;text-transform:uppercase;letter-spacing:1px}
   .timer .sm{font-size:12px;opacity:.9;margin-top:4px;font-weight:700}
@@ -262,12 +267,15 @@
     color:#fff;border-radius:16px;padding:15px 18px;font-size:16px;font-weight:700;text-align:left}
   .login-opt:active{transform:scale(.97);background:#fff;color:var(--ink)}
   .login-opt .ic{font-size:24px}
-  .synctag{position:absolute;top:calc(12px + env(safe-area-inset-top));left:14px;font-size:11px;font-weight:700;opacity:.85}
-  .userchip{position:absolute;top:calc(10px + env(safe-area-inset-top));right:14px;background:var(--glass-strong);
+  .synctag{position:absolute;top:14px;left:16px;font-size:11px;font-weight:700;opacity:.85}
+  .userchip{position:absolute;top:11px;right:12px;background:var(--glass-strong);
     border:1px solid var(--stroke);color:#fff;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:700;
     backdrop-filter:blur(12px);display:flex;align-items:center;gap:5px}
   .userchip:active{transform:scale(.95)}
   .exitpop{position:fixed;inset:0;z-index:400;background:rgba(10,12,24,.6);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:28px}
+  .cfsub{font-size:13px;opacity:.8;margin-top:6px;line-height:1.5}
+  .exitbtns button.ok{background:linear-gradient(135deg,#2fbf71,#1f9a58);border-color:transparent}
+  .exitbtns button.go{background:linear-gradient(135deg,#6f9bff,#4f7de0);border-color:transparent}
   .exitpop.show{display:flex;animation:fade .2s}
   .exitbox{width:100%;max-width:320px;text-align:center;background:rgba(30,33,52,.96);backdrop-filter:blur(26px);border:1px solid var(--stroke);border-radius:24px;padding:26px 20px 20px;box-shadow:var(--shadow)}
   .exitlogo{font-size:40px}
@@ -322,6 +330,15 @@
     <div class="exitlogo">🦐</div>
     <div class="exittitle">ออกจากแอปร้านกุ้งเผา?</div>
     <div class="exitbtns"><button onclick="hideExit()">ยกเลิก</button><button class="danger" onclick="doExit()">ออกจากแอป</button></div>
+  </div>
+</div>
+
+<div id="confirmPop" class="exitpop">
+  <div class="exitbox">
+    <div class="exitlogo" id="cfIcon">⚠️</div>
+    <div class="exittitle" id="cfTitle"></div>
+    <div class="cfsub" id="cfSub"></div>
+    <div class="exitbtns"><button onclick="cfClose()">ยกเลิก</button><button class="danger" id="cfOk" onclick="cfOk()">ยืนยัน</button></div>
   </div>
 </div>
 
@@ -506,13 +523,17 @@ function renderOrders(){
 function preLeftText(preAt){let m=Math.round((preAt-Date.now())/60000);if(m<=0)return'ถึงเวลา!';if(m<60)return m+' น.';const h=Math.floor(m/60);return h+' ชม.'+(m%60?' '+(m%60)+'น.':'');}
 function activatePre(id){const o=orders.find(x=>x.id===id);if(!o)return;o.status='cooking';o.ts=Date.now();o.preAt=null;persist();render();toast('เริ่มทำออร์เดอร์แล้ว 🔥');}
 function completeOrder(id){const o=orders.find(x=>x.id===id);if(!o)return;
+  askConfirm('🛵','พร้อมส่ง?','ส่ง "'+(o.name||'')+'" เข้าคิวไรเดอร์','🛵 พร้อมส่ง','go',()=>doCompleteOrder(id));}
+function doCompleteOrder(id){const o=orders.find(x=>x.id===id);if(!o)return;
   const d=o.dormId?dorms.find(x=>x.id===o.dormId):null;
   const note=(o.cart&&o.cart.length?cartSummary(o.cart):'')+(o.note?(o.cart&&o.cart.length?' | ':'')+o.note:'')+(orderTotal(o)?' ('+baht(orderTotal(o))+')':'');
   stops.push({id:uid(),orderId:o.id,name:o.name,dormId:o.dormId||null,addr:d?d.addr:'',phone:o.phone||'',note:note,
     lat:d?d.lat:null,lng:d?d.lng:null,orderTs:o.ts,createdTs:Date.now(),done:false,startedAt:null}); // orderTs=o.ts → เวลานับต่อเนื่อง
   o.status='delivering';o.done=false;firstFit=true;
   persist();buzz([60]);render();toast('พร้อมส่ง → เข้าคิวไรเดอร์ 🛵');}
-function delOrder(id){orders=orders.filter(x=>x.id!==id);cloudRemove('orders',id);persist();render();}
+function delOrder(id){const o=orders.find(x=>x.id===id);
+  askConfirm('🗑','ลบบิลนี้?','"'+((o&&o.name)||'')+'" จะถูกลบถาวร','🗑 ลบบิล','danger',()=>{
+    orders=orders.filter(x=>x.id!==id);cloudRemove('orders',id);persist();render();toast('ลบบิลแล้ว');});}
 
 /* ===== HISTORY ===== */
 function renderHistory(){
@@ -534,21 +555,23 @@ function renderHistory(){
     const dur=o.doneAt?Math.round((o.doneAt-o.ts)/60000):null;
     const t=new Date(o.doneAt||o.ts).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
     const dd=new Date(o.doneAt||o.ts).toLocaleDateString('th-TH',{day:'numeric',month:'short'});
-    const deliver=!!o.dormId,tot=orderTotal(o);
+    const deliver=!!o.dormId||!!o.delivered,tot=orderTotal(o);
     html+=`<div class="card ok" style="opacity:.9"><div class="accent"></div>
       <div class="row"><div>
         <div class="title">${esc(o.name)}</div>
         <div class="sub">${orderLines(o)}${o.ch?' · '+esc(o.ch):''}</div>
-        ${deliver?`<span class="dorm">🏢 ${esc(dormName(o.dormId))}</span>`:'<span class="badge gray">รับหน้าร้าน</span>'}
+        ${o.dormId?`<span class="dorm">🏢 ${esc(dormName(o.dormId))}</span>`:deliver?'':'<span class="badge gray">รับหน้าร้าน</span>'}
         ${tot?`<span class="badge gray">${baht(tot)}</span>`:''}
-        <span class="badge ok">${deliver?'ส่งสำเร็จ':'ปิดออร์เดอร์'}</span></div>
+        <span class="badge ok">${deliver?'ส่งสำเร็จ':'ปิดออร์เดอร์'}</span>
+        ${o.deliveredBy?`<span class="badge gray">🛵 ${esc(o.deliveredBy)}</span>`:''}</div>
         <div class="timer"><div class="big" style="font-size:16px">${dd}</div><div class="lbl">${t} น.</div>
-        ${dur!=null?`<div class="sm">รวม ${dur} นาที</div>`:''}</div></div></div>`;});
+        ${dur!=null?`<div class="sm">รวม ${dur} นาที</div>`:''}</div></div>
+      <div class="actions"><button class="btn del main" onclick="delOrder('${o.id}')">🗑 ลบบิล</button></div></div>`;});
   return html;
 }
-function clearHistory(){if(!confirm('ล้างประวัติออร์เดอร์ที่ส่ง/ปิดแล้วทั้งหมด?'))return;
+function clearHistory(){askConfirm('🗑','ล้างประวัติทั้งหมด?','บิลที่ส่ง/ปิดแล้วทุกใบจะถูกลบถาวร','🗑 ล้างทั้งหมด','danger',()=>{
   orders.filter(o=>o.status==='done').forEach(o=>cloudRemove('orders',o.id));
-  orders=orders.filter(o=>o.status!=='done');persist();render();toast('ล้างประวัติแล้ว');}
+  orders=orders.filter(o=>o.status!=='done');persist();render();toast('ล้างประวัติแล้ว');});}
 
 /* ===== MENU MANAGEMENT ===== */
 function renderMenu(){
@@ -614,12 +637,19 @@ function renderRiderView(){const main=document.getElementById('main');
   if(!map){main.innerHTML=`
       <div id="mapWrap"><div id="map"></div>
         <div class="map-overlay map-status"><span class="dotpulse off" id="gpsDot"></span><span id="gpsTxt">กำลังหาตำแหน่ง…</span></div>
-        <div class="map-overlay map-btns"><button class="mbtn on" id="followBtn" onclick="toggleFollow()">🎯</button></div>
+        <div class="map-overlay map-btns">
+          <button class="mbtn on" id="followBtn" onclick="toggleFollow()">🎯</button>
+          <button class="mbtn rotbtn" onclick="rotMap(-30)" aria-label="หมุนซ้าย">⟲</button>
+          <button class="mbtn rotbtn" onclick="rotMap(30)" aria-label="หมุนขวา">⟳</button>
+          <button class="mbtn rotbtn" id="compassBtn" onclick="rotMap(0,true)" aria-label="กลับทิศเหนือ">🧭</button>
+        </div>
       </div>
       <div id="riderSummary"></div><div id="stopList"></div>`;
     initMap();}
   renderStopList();drawMap();}
-function initMap(){map=L.map('map',{zoomControl:false}).setView(lastPos||BKK,14);
+function initMap(){const rot=!!(L.Map.prototype.setBearing);
+  map=L.map('map',Object.assign({zoomControl:false},rot?{rotate:true,touchRotate:true,rotateControl:false,bearing:0}:{})).setView(lastPos||BKK,14);
+  if(!rot)document.querySelectorAll('.rotbtn').forEach(b=>b.style.display='none');
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
   stopLayer=L.layerGroup().addTo(map);routeLayer=L.layerGroup().addTo(map);straightLayer=L.layerGroup().addTo(map);presenceLayer=L.layerGroup().addTo(map);
   map.on('dragstart',()=>{follow=false;const f=document.getElementById('followBtn');f&&f.classList.remove('on');});
@@ -644,6 +674,10 @@ function updateRider(){if(!map||!lastPos)return;
   if(!riderMarker)riderMarker=L.marker(lastPos,{icon:ic,zIndexOffset:1000}).addTo(map);
   else{riderMarker.setLatLng(lastPos);riderMarker.setIcon(ic);}}
 function toggleFollow(){follow=!follow;document.getElementById('followBtn').classList.toggle('on',follow);if(follow&&lastPos&&map)map.setView(lastPos,15,{animate:true});}
+function rotMap(d,reset){if(!map||!map.setBearing)return;
+  const b=reset?0:((map.getBearing()||0)+d);map.setBearing(b);
+  const c=document.getElementById('compassBtn');if(c)c.style.transform='rotate('+b+'deg)';
+  if(reset)toast('กลับทิศเหนือแล้ว 🧭');}
 function pendingWithCoords(){return stops.filter(s=>!s.done&&s.lat!=null);}
 function buildingSVG(){return '<svg width="48" height="60" viewBox="0 0 48 60" xmlns="http://www.w3.org/2000/svg">'
   +'<path d="M24 59 L15 45 L33 45 Z" fill="#1a1a1a"/>'
@@ -711,20 +745,30 @@ function renderStopList(){const wrap=document.getElementById('stopList');if(!wra
         <button class="btn sq" onclick="moveStop(${i},1)" ${i===stops.length-1?'disabled style=opacity:.3':''}>▼</button>
         <button class="btn sq" onclick="editStopLoc('${s.id}')">📍</button>
         ${hasPin?`<button class="btn sq nav" onclick="navTo('${s.id}')">🧭</button>`:''}
+        <button class="btn sq del" onclick="delStop('${s.id}')">🗑</button>
+      </div>
+      <div class="actions" style="margin-top:8px">
         ${done?`<button class="btn del main" onclick="delStop('${s.id}')">🗑 ลบออก</button>`
           :onway?`<button class="btn done main" onclick="deliverStop('${s.id}')">✓ ส่งจบงาน</button>`
-          :`<button class="btn go" style="flex:1 1 40%" onclick="startStop('${s.id}')">🛵 ออกส่ง</button>
-           <button class="btn done" style="flex:1 1 40%" onclick="deliverStop('${s.id}')">✓ ส่งจบงาน</button>`}
+          :`<button class="btn go" style="flex:1" onclick="startStop('${s.id}')">🛵 ออกส่ง</button>
+           <button class="btn done" style="flex:1" onclick="deliverStop('${s.id}')">✓ ส่งจบงาน</button>`}
       </div></div>`;});
   wrap.innerHTML=html;}
 function sortByWait(){const pend=stops.filter(s=>!s.done),done=stops.filter(s=>s.done);
   pend.sort((a,b)=>(a.orderTs||a.createdTs)-(b.orderTs||b.createdTs));stops=[...pend,...done];persist();renderStopList();drawMap();toast('เรียงตามเวลารอแล้ว ⏱');}
 function moveStop(i,dir){const j=i+dir;if(j<0||j>=stops.length)return;[stops[i],stops[j]]=[stops[j],stops[i]];persist();renderStopList();drawMap();}
 function startStop(id){const s=stops.find(x=>x.id===id);if(s){s.startedAt=Date.now();persist();renderStopList();}}
-function deliverStop(id){const s=stops.find(x=>x.id===id);if(s){s.done=true;s.doneAt=Date.now();
-  if(s.orderId){const o=orders.find(x=>x.id===s.orderId);if(o){o.status='done';o.done=true;o.doneAt=Date.now();}}
-  persist();renderStopList();drawMap();toast('ส่งสำเร็จ! บันทึกเข้าประวัติ ✓');}}
-function delStop(id){stops=stops.filter(x=>x.id!==id);cloudRemove('stops',id);persist();renderStopList();drawMap();}
+function deliverStop(id){const s=stops.find(x=>x.id===id);if(!s)return;
+  askConfirm('✅','ส่งจบงาน?','"'+(s.name||'')+'" จะย้ายไปหน้าประวัติ','✓ ส่งจบงาน','ok',()=>doDeliverStop(id));}
+function doDeliverStop(id){const s=stops.find(x=>x.id===id);if(!s)return;const now=Date.now();
+  if(s.orderId){const o=orders.find(x=>x.id===s.orderId);if(o){o.status='done';o.done=true;o.doneAt=now;o.deliveredBy=currentUser;o.delivered=true;}}
+  else{orders.push({id:uid(),name:s.name||'จุดส่ง',status:'done',done:true,ts:s.orderTs||s.createdTs||now,createdAt:s.createdTs||now,
+    doneAt:now,cart:[],dormId:s.dormId||null,deliveredBy:currentUser,delivered:true});}
+  stops=stops.filter(x=>x.id!==id);cloudRemove('stops',id);
+  persist();renderStopList();drawMap();toast('ส่งจบงาน! ย้ายเข้าประวัติ ✓');}
+function delStop(id){const s=stops.find(x=>x.id===id);
+  askConfirm('🗑','ลบจุดส่งนี้?','"'+((s&&s.name)||'')+'" จะถูกลบออกจากคิว','🗑 ลบ','danger',()=>{
+    stops=stops.filter(x=>x.id!==id);cloudRemove('stops',id);persist();renderStopList();drawMap();});}
 function navTo(id){const s=stops.find(x=>x.id===id);if(s&&s.lat!=null)navToLL(s.lat,s.lng);}
 function navToLL(lat,lng){window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`,'_blank');}
 function navRoute(){const pins=pendingWithCoords();if(!pins.length)return;
@@ -868,7 +912,7 @@ function saveDorm(edit){const name=document.getElementById('dName').value.trim()
 /* ===== Map picker ===== */
 let pickerMap=null,pickerCb=null;
 function openPicker(init,cb){pickerCb=cb;document.getElementById('picker').classList.add('show');const center=init||lastPos||BKK;
-  setTimeout(()=>{if(!pickerMap){pickerMap=L.map('pickerMap',{zoomControl:false,attributionControl:false}).setView(center,init?17:15);
+  setTimeout(()=>{if(!pickerMap){pickerMap=L.map('pickerMap',Object.assign({zoomControl:false,attributionControl:false},L.Map.prototype.setBearing?{rotate:true,touchRotate:true}:{})).setView(center,init?17:15);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(pickerMap);}else pickerMap.setView(center,init?17:15);
     pickerMap.invalidateSize();},150);}
 function pickerLocate(){if(!navigator.geolocation)return;navigator.geolocation.getCurrentPosition(p=>{pickerMap&&pickerMap.setView([p.coords.latitude,p.coords.longitude],17);},()=>{},{enableHighAccuracy:true});}
@@ -912,6 +956,7 @@ function updateUserChip(){const c=document.getElementById('userChip');const u=US
 
 /* ===== back button ===== */
 function closeTopUI(){
+  const cf=document.getElementById('confirmPop');if(cf&&cf.classList.contains('show')){cfClose();return true;}
   const ex=document.getElementById('exitPop');if(ex&&ex.classList.contains('show')){hideExit();return true;}
   const mp=document.getElementById('menuPick');if(mp&&mp.classList.contains('show')){closeMenuPick();return true;}
   const pk=document.getElementById('picker');if(pk&&pk.classList.contains('show')){closePicker();return true;}
@@ -924,6 +969,17 @@ function handleBack(){
   if(view!=='orders'){switchView('orders');return;}
   showExit();
 }
+/* ===== confirm popup (กันมือไปโดน) ===== */
+let _cfCb=null;
+function askConfirm(icon,title,sub,btnTxt,cls,cb){_cfCb=cb;
+  document.getElementById('cfIcon').textContent=icon||'⚠️';
+  document.getElementById('cfTitle').textContent=title;
+  document.getElementById('cfSub').textContent=sub||'';
+  const b=document.getElementById('cfOk');b.textContent=btnTxt||'ยืนยัน';b.className=cls||'danger';
+  document.getElementById('confirmPop').classList.add('show');}
+function cfClose(){document.getElementById('confirmPop').classList.remove('show');_cfCb=null;}
+function cfOk(){const cb=_cfCb;cfClose();cb&&cb();}
+
 function showExit(){document.getElementById('exitPop').classList.add('show');}
 function hideExit(){document.getElementById('exitPop').classList.remove('show');}
 function doExit(){if(window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App){Capacitor.Plugins.App.exitApp();}else{hideExit();history.back();}}
