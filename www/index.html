@@ -105,7 +105,7 @@
   .btn.done{background:linear-gradient(135deg,#2fbf71,#1f9a58);border-color:transparent}
   .btn.del{flex:0 0 46px;background:rgba(244,63,94,.22);border-color:rgba(244,63,94,.4)}
   .btn.go{background:linear-gradient(135deg,#6f9bff,#4f7de0);border-color:transparent}
-  .btn.nav{background:linear-gradient(135deg,#22c1c3,#3a86ff);border-color:transparent}
+  .btn.mapnav{background:linear-gradient(135deg,#22c1c3,#3a86ff);border-color:transparent}
   .btn.pin{flex:0 0 46px;font-size:17px}
   .btn.edit{flex:0 0 46px;font-size:17px}
   .btn.mini{flex:0 0 44px;font-size:17px;padding:9px}
@@ -622,7 +622,7 @@ function renderDorms(){
       <div class="actions">
         <button class="btn go" onclick="editDorm('${d.id}')">✎ แก้ไข</button>
         <button class="btn pin" onclick="pinDorm('${d.id}')">📍</button>
-        ${hasPin?`<button class="btn nav" onclick="navToLL(${d.lat},${d.lng})">🧭</button>`:''}
+        ${hasPin?`<button class="btn mapnav" onclick="navToLL(${d.lat},${d.lng})">🧭</button>`:''}
         <button class="btn del" onclick="delDorm('${d.id}')">🗑</button></div></div>`;});
   return html;
 }
@@ -744,7 +744,7 @@ function renderStopList(){const wrap=document.getElementById('stopList');if(!wra
         <button class="btn sq" onclick="moveStop(${i},-1)" ${i===0?'disabled style=opacity:.3':''}>▲</button>
         <button class="btn sq" onclick="moveStop(${i},1)" ${i===stops.length-1?'disabled style=opacity:.3':''}>▼</button>
         <button class="btn sq" onclick="editStopLoc('${s.id}')">📍</button>
-        ${hasPin?`<button class="btn sq nav" onclick="navTo('${s.id}')">🧭</button>`:''}
+        ${hasPin?`<button class="btn sq mapnav" onclick="navTo('${s.id}')">🧭</button>`:''}
         <button class="btn sq del" onclick="delStop('${s.id}')">🗑</button>
       </div>
       <div class="actions" style="margin-top:8px">
